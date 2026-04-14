@@ -13,36 +13,27 @@ st.set_page_config(page_title="AI 주식 대시보드", layout="wide")
 st.title("📊 AI 주식 트레이딩 대시보드 (HTS PRO FINAL + NEWS)")
 
 # ----------------------
-# 🔥 KRX 전체 종목 불러오기
+# 🔥 CSV로 종목 불러오기 (핵심 수정)
 # ----------------------
 @st.cache_data
-def load_krx_ticker_list():
-
-    def get_market(market_type):
-        url = f"https://kind.krx.co.kr/corpgeneral/corpList.do?method=download&marketType={market_type}"
-        res = requests.get(url)
-        res.encoding = "cp949"
-
-        df = pd.read_html(res.text, header=0)[0]
-        df["종목코드"] = df["종목코드"].astype(str).str.zfill(6)
+def load_ticker_csv():
+    try:
+        df = pd.read_csv("krx_tickers.csv")
         return df
+    except:
+        st.error("❌ krx_tickers.csv 파일 없음 (GitHub 업로드 필요)")
+        st.stop()
 
-    kospi = get_market("stockMkt")
-    kosdaq = get_market("kosdaqMkt")
-
-    kospi["티커"] = kospi["종목코드"] + ".KS"
-    kosdaq["티커"] = kosdaq["종목코드"] + ".KQ"
-
-    df = pd.concat([kospi, kosdaq])
-    return df[["회사명", "티커"]]
-
-ticker_df = load_krx_ticker_list()
+ticker_df = load_ticker_csv()
 
 # ----------------------
 # 🔍 종목 검색
 # ----------------------
 search = st.sidebar.text_input("종목 검색 (예: 삼성전자)")
-filtered = ticker_df[ticker_df["회사명"].str.contains(search, case=False, na=False)]
+
+filtered = ticker_df[
+    ticker_df["회사명"].str.contains(search, case=False, na=False)
+]
 
 if not filtered.empty:
     options = filtered["회사명"].tolist()
@@ -86,7 +77,6 @@ def load_data(ticker, start, end, interval):
         df.columns = df.columns.get_level_values(0)
 
     df.columns = [col.capitalize() for col in df.columns]
-
     df.index = pd.to_datetime(df.index)
 
     try:
@@ -102,7 +92,7 @@ def load_data(ticker, start, end, interval):
     return df
 
 # ----------------------
-# 거래대금 포맷
+# 거래대금
 # ----------------------
 def format_korean_money(value):
     if value >= 1_0000_0000_0000:
@@ -113,7 +103,7 @@ def format_korean_money(value):
         return f"{value:,.0f}원"
 
 # ----------------------
-# 📰 뉴스 가져오기
+# 뉴스
 # ----------------------
 @st.cache_data(ttl=600)
 def get_news(query):
@@ -129,30 +119,26 @@ def get_news(query):
 
     return results
 
-# ----------------------
-# 🤖 뉴스 분석
-# ----------------------
 def analyze_news(news_list):
 
     text = " ".join([n["title"] for n in news_list])
 
-    positive_words = ["상승", "호재", "성장", "수혜", "강세", "기대"]
-    negative_words = ["하락", "악재", "위기", "급락", "우려", "매도"]
+    positive = ["상승", "호재", "성장", "수혜", "강세"]
+    negative = ["하락", "악재", "위기", "급락", "우려"]
 
     score = 0
 
-    for word in positive_words:
-        if word in text:
+    for p in positive:
+        if p in text:
             score += 1
-
-    for word in negative_words:
-        if word in text:
+    for n in negative:
+        if n in text:
             score -= 1
 
     if score > 1:
-        return "🔥 긍정 (매수 우위)"
+        return "🔥 긍정"
     elif score < -1:
-        return "⚠️ 부정 (매도 우위)"
+        return "⚠️ 부정"
     else:
         return "➖ 중립"
 
@@ -167,14 +153,14 @@ if st.sidebar.button("조회하기"):
         st.error("데이터 없음")
         st.stop()
 
-    st.subheader(f"📊 {selected_name} ({ticker}) / {interval}")
+    st.subheader(f"📊 {selected_name} ({ticker})")
 
-    # 이동평균선
-    ma_list = [5, 7, 10, 15, 20, 60, 120]
+    # 이동평균
+    ma_list = [5, 10, 20, 60, 120]
     for ma in ma_list:
         df[f"MA{ma}"] = df["Close"].rolling(ma).mean()
 
-    # 🔥 Envelope (중심선 제외)
+    # 🔥 Envelope (핵심 정확 계산)
     df["ENV_UPPER"] = df["MA20"] * 1.2
     df["ENV_LOWER"] = df["MA20"] * 0.8
 
@@ -184,14 +170,8 @@ if st.sidebar.button("조회하기"):
     # ----------------------
     # 차트
     # ----------------------
-    fig = make_subplots(
-        rows=2, cols=1,
-        shared_xaxes=True,
-        row_heights=[0.7, 0.3],
-        vertical_spacing=0.03
-    )
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
 
-    # 캔들
     fig.add_trace(go.Candlestick(
         x=df.index,
         open=df["Open"],
@@ -199,112 +179,39 @@ if st.sidebar.button("조회하기"):
         low=df["Low"],
         close=df["Close"],
         increasing_line_color='red',
-        decreasing_line_color='blue',
-        name="캔들"
+        decreasing_line_color='blue'
     ), row=1, col=1)
 
-    # 이동평균선
     for ma in ma_list:
-        fig.add_trace(go.Scatter(
-            x=df.index,
-            y=df[f"MA{ma}"],
-            name=f"MA{ma}",
-            line=dict(width=1)
-        ), row=1, col=1)
+        fig.add_trace(go.Scatter(x=df.index, y=df[f"MA{ma}"], name=f"MA{ma}"), row=1, col=1)
 
-    # 🔥 Envelope (상단/하단만)
-    fig.add_trace(go.Scatter(
-        x=df.index,
-        y=df["ENV_UPPER"],
-        name="Envelope 상단",
-        line=dict(color="black", width=1, dash="dot")
-    ), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df["ENV_UPPER"], name="상단", line=dict(color="black")), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df["ENV_LOWER"], name="하단", line=dict(color="black")), row=1, col=1)
 
-    fig.add_trace(go.Scatter(
-        x=df.index,
-        y=df["ENV_LOWER"],
-        name="Envelope 하단",
-        line=dict(color="black", width=1, dash="dot")
-    ), row=1, col=1)
-
-    # 거래량
-    fig.add_trace(go.Bar(
-        x=df.index,
-        y=df["Volume"],
-        name="거래량",
-        opacity=0.5
-    ), row=2, col=1)
-
-    # 거래대금
-    fig.add_trace(go.Scatter(
-        x=df.index,
-        y=df["Value"],
-        name="거래대금",
-        line=dict(width=1)
-    ), row=2, col=1)
-
-    fig.update_layout(
-        height=900,
-        xaxis_rangeslider_visible=False,
-        yaxis=dict(tickformat=",", title="가격 (₩)"),
-        legend=dict(orientation="h"),
-        hovermode="x unified"
-    )
+    fig.add_trace(go.Bar(x=df.index, y=df["Volume"], name="거래량"), row=2, col=1)
 
     st.plotly_chart(fig, use_container_width=True)
 
     # ----------------------
-    # 현재가 정보
+    # 현재가
     # ----------------------
     latest = df.iloc[-1]
     prev = df.iloc[-2]
 
     close = float(latest["Close"])
-    prev_close = float(prev["Close"])
-    change = ((close - prev_close) / prev_close) * 100
-    value = int(latest["Value"])
+    change = ((close - prev["Close"]) / prev["Close"]) * 100
 
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric("현재가", f"₩{close:,.0f}")
-    col2.metric("변동률", f"{change:.2f}%")
-    col3.metric("거래대금", format_korean_money(value))
+    st.metric("현재가", f"{close:,.0f}")
+    st.metric("변동률", f"{change:.2f}%")
 
     # ----------------------
-    # AI 매매 시그널
+    # 뉴스
     # ----------------------
-    st.subheader("🤖 AI 매매 시그널")
-
-    if latest["MA5"] > latest["MA20"]:
-        st.success("🔥 단기 상승")
-    else:
-        st.warning("⚠️ 단기 약세")
-
-    if latest["MA20"] > latest["MA60"]:
-        st.success("🔥 중기 상승")
-    else:
-        st.warning("⚠️ 중기 약세")
-
-    # ----------------------
-    # 📰 뉴스
-    # ----------------------
-    st.subheader("📰 최신 뉴스 분석")
+    st.subheader("📰 뉴스")
 
     news_list = get_news(selected_name)
 
-    if not news_list:
-        st.warning("뉴스 없음")
-    else:
-        for n in news_list:
-            st.markdown(f"- [{n['title']}]({n['link']})")
+    for n in news_list:
+        st.markdown(f"- [{n['title']}]({n['link']})")
 
-        sentiment = analyze_news(news_list)
-
-        st.subheader("🤖 뉴스 기반 AI 판단")
-        st.info(sentiment)
-
-    # ----------------------
-    # 데이터
-    # ----------------------
-    st.subheader("📋 데이터")
-    st.dataframe(df.tail(50))
+    st.info(analyze_news(news_list))
