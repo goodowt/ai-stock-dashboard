@@ -5,3 +5,5 @@ yfinance
 openai
 requests
 feedparser
+lxml
+html5lib
