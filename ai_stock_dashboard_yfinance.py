@@ -163,55 +163,67 @@ def analyze_news(news_list):
 # ----------------------
 # AI 투자의견 (규칙 기반 기술적 신호)
 # ----------------------
-def generate_ai_opinion(df, news_score):
+def generate_ai_opinion(df, news_score, news_label):
     score = 0
     reasons = []
 
     latest = df.iloc[-1]
     ma5, ma20, ma60 = latest.get("MA5"), latest.get("MA20"), latest.get("MA60")
+    close = latest["Close"]
 
     if pd.notna(ma5) and pd.notna(ma20) and pd.notna(ma60):
         if ma5 > ma20 > ma60:
             score += 1
-            reasons.append("이동평균 정배열 (단기 > 중기 > 장기)")
+            reasons.append(
+                f"이동평균이 정배열(MA5 {ma5:,.0f} > MA20 {ma20:,.0f} > MA60 {ma60:,.0f})을 "
+                "보이고 있어 단기 상승 추세로 해석됩니다."
+            )
         elif ma5 < ma20 < ma60:
             score -= 1
-            reasons.append("이동평균 역배열 (단기 < 중기 < 장기)")
+            reasons.append(
+                f"이동평균이 역배열(MA5 {ma5:,.0f} < MA20 {ma20:,.0f} < MA60 {ma60:,.0f})을 "
+                "보이고 있어 단기 하락 추세로 해석됩니다."
+            )
 
     if pd.notna(ma5) and pd.notna(ma20) and len(df) >= 4:
         diff = df["MA5"] - df["MA20"]
         recent_diff = diff.tail(4)
         if recent_diff.iloc[0] < 0 and recent_diff.iloc[-1] > 0:
             score += 1
-            reasons.append("최근 골든크로스 발생 (MA5가 MA20 상향 돌파)")
+            reasons.append("최근 3거래일 이내 MA5가 MA20을 상향 돌파하는 골든크로스가 발생했습니다.")
         elif recent_diff.iloc[0] > 0 and recent_diff.iloc[-1] < 0:
             score -= 1
-            reasons.append("최근 데드크로스 발생 (MA5가 MA20 하향 돌파)")
+            reasons.append("최근 3거래일 이내 MA5가 MA20을 하향 돌파하는 데드크로스가 발생했습니다.")
 
-    close = latest["Close"]
     upper, lower = latest.get("ENV_UPPER"), latest.get("ENV_LOWER")
     if pd.notna(upper) and close >= upper * 0.98:
         score -= 1
-        reasons.append("Envelope 상단 근접 (단기 과열 구간)")
+        reasons.append(f"현재가({close:,.0f})가 Envelope 상단({upper:,.0f})에 근접해 단기 과열 구간으로 판단됩니다.")
     elif pd.notna(lower) and close <= lower * 1.02:
         score += 1
-        reasons.append("Envelope 하단 근접 (단기 저평가 구간)")
+        reasons.append(f"현재가({close:,.0f})가 Envelope 하단({lower:,.0f})에 근접해 단기 저평가 구간으로 판단됩니다.")
 
     if news_score != 0:
-        reasons.append(f"뉴스 감성분석 반영 ({'긍정' if news_score > 0 else '부정'})")
+        reasons.append(
+            f"최근 뉴스 감성분석 결과가 '{news_label}'로 나타나 "
+            f"{'긍정적' if news_score > 0 else '부정적'} 요인으로 반영됩니다."
+        )
     score += news_score
 
     if score >= 2:
         label, css = "🔥 매수 우위", "opinion-buy"
+        verdict = "매수 신호가 매도 신호보다 우세하여 '매수 우위'로 판단됩니다."
     elif score <= -2:
         label, css = "⚠️ 매도 우위", "opinion-sell"
+        verdict = "매도 신호가 매수 신호보다 우세하여 '매도 우위'로 판단됩니다."
     else:
         label, css = "➖ 중립", "opinion-neutral"
+        verdict = "매수·매도 신호가 뚜렷하지 않거나 서로 엇갈려 '중립'으로 판단됩니다."
 
     if not reasons:
-        reasons.append("뚜렷한 매수/매도 신호가 없습니다.")
+        reasons = ["뚜렷한 기술적 매수/매도 신호가 관측되지 않았습니다."]
 
-    return label, css, reasons
+    return label, css, reasons, verdict
 
 # ----------------------
 # 실행
@@ -250,18 +262,17 @@ if refresh:
 
     st.subheader(f"{selected_name} ({code})")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
     c1.markdown(f"**현재가**<br><span class='{price_class}' style='font-size:1.4rem'>{price_info['현재가']:,.0f}</span>", unsafe_allow_html=True)
     c2.markdown(f"**전일대비**<br><span class='{price_class}' style='font-size:1.4rem'>{sign}{change:,.0f} ({sign}{change_pct:.2f}%)</span>", unsafe_allow_html=True)
-    c3.markdown(f"**누적거래량**<br><span style='font-size:1.4rem'>{price_info['누적거래량']:,.0f}</span>", unsafe_allow_html=True)
-    c4.markdown(f"**누적거래대금**<br><span style='font-size:1.4rem'>{format_korean_money(price_info['누적거래대금'])}</span>", unsafe_allow_html=True)
+    c3.markdown(f"**당일 거래대금**<br><span style='font-size:1.4rem'>{format_korean_money(price_info['누적거래대금'])}</span>", unsafe_allow_html=True)
 
     st.divider()
 
     # ----------------------
-    # 메인 영역: 차트(좌) + AI의견/체결정보(우)
+    # 메인 영역: 차트(좌) + AI의견(우)
     # ----------------------
-    col_chart, col_side = st.columns([7, 3])
+    col_chart, col_side = st.columns([6, 4])
 
     with col_chart:
         fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.7, 0.3])
@@ -270,7 +281,15 @@ if refresh:
             x=df.index,
             open=df["Open"], high=df["High"], low=df["Low"], close=df["Close"],
             increasing_line_color='red', decreasing_line_color='blue',
-            name="가격"
+            name="가격",
+            hovertemplate=(
+                "%{x}<br>"
+                "시가: %{open:,.0f}원<br>"
+                "고가: %{high:,.0f}원<br>"
+                "저가: %{low:,.0f}원<br>"
+                "종가: %{close:,.0f}원"
+                "<extra></extra>"
+            ),
         ), row=1, col=1)
 
         for ma in ma_list:
@@ -279,35 +298,26 @@ if refresh:
         fig.add_trace(go.Scatter(x=df.index, y=df["ENV_UPPER"], name="Env 상단", line=dict(color="black")), row=1, col=1)
         fig.add_trace(go.Scatter(x=df.index, y=df["ENV_LOWER"], name="Env 하단", line=dict(color="black")), row=1, col=1)
 
-        fig.add_trace(go.Bar(x=df.index, y=df["Volume"], name="거래량"), row=2, col=1)
+        fig.add_trace(go.Bar(
+            x=df.index, y=df["Value"], name="거래대금",
+            hovertemplate="%{x}<br>거래대금: %{y:,.0f}원<extra></extra>",
+        ), row=2, col=1)
 
         fig.update_layout(height=650, margin=dict(l=10, r=10, t=30, b=10))
         st.plotly_chart(fig, use_container_width=True)
 
     with col_side:
-        label, css, reasons = generate_ai_opinion(df, news_score)
+        label, css, reasons, verdict = generate_ai_opinion(df, news_score, news_label)
 
         st.markdown(f"""
         <div class="hts-card">
             <h4>🤖 AI 투자의견</h4>
             <span class="opinion-badge {css}">{label}</span>
-            <ul>{"".join(f"<li>{r}</li>" for r in reasons)}</ul>
+            <ul style="margin-top:10px;">{"".join(f"<li>{r}</li>" for r in reasons)}</ul>
+            <div style="font-weight:700; margin-top:6px;">→ {verdict}</div>
             <div style="font-size:0.8rem; opacity:0.7; margin-top:8px;">
                 본 의견은 기술적 지표 기반 참고용이며 투자 조언이 아닙니다.
             </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown(f"""
-        <div class="hts-card">
-            <h4>📋 체결/거래 정보</h4>
-            <table style="width:100%; font-size:0.9rem;">
-                <tr><td>52주 최고</td><td style="text-align:right">{price_info['52주최고']:,.0f}</td></tr>
-                <tr><td>52주 최저</td><td style="text-align:right">{price_info['52주최저']:,.0f}</td></tr>
-                <tr><td>시가총액</td><td style="text-align:right">{format_korean_money(price_info['시가총액'] * 1_0000_0000)}</td></tr>
-                <tr><td>누적거래량</td><td style="text-align:right">{price_info['누적거래량']:,.0f}</td></tr>
-                <tr><td>누적거래대금</td><td style="text-align:right">{format_korean_money(price_info['누적거래대금'])}</td></tr>
-            </table>
         </div>
         """, unsafe_allow_html=True)
 
