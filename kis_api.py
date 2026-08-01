@@ -1,6 +1,7 @@
 # kis_api.py
 # 한국투자증권 KIS Open API (모의투자) 래퍼
 
+import threading
 import time
 from datetime import datetime, timedelta
 
@@ -34,40 +35,48 @@ def _get_keys():
     return app_key, app_secret
 
 
-def get_access_token():
-    """OAuth 토큰을 발급받아 session_state에 캐싱하고, 만료 전까지 재사용한다."""
+@st.cache_resource
+def _token_store():
+    # 세션(session_state)이 아니라 앱 프로세스 전체가 공유하는 저장소.
+    # KIS 토큰 발급은 앱키 기준 1분당 1회 제한이라, 세션별로 따로 캐싱하면
+    # 동시 접속자가 늘어날 때마다 재발급이 충돌해 403이 난다.
+    return {"access_token": None, "expires_at": 0.0, "lock": threading.Lock()}
 
-    cached = st.session_state.get("kis_token")
-    if cached and cached["expires_at"] > time.time() + 60:
-        return cached["access_token"]
 
-    app_key, app_secret = _get_keys()
+def get_access_token(force_refresh=False):
+    """OAuth 토큰을 앱 전체에서 공유 캐싱하고, 만료 전까지 재사용한다."""
 
-    res = requests.post(
-        f"{BASE_URL}/oauth2/tokenP",
-        json={
-            "grant_type": "client_credentials",
-            "appkey": app_key,
-            "appsecret": app_secret,
-        },
-        timeout=10,
-    )
+    store = _token_store()
 
-    if res.status_code != 200:
-        raise KISAPIError(f"KIS 토큰 발급 실패 ({res.status_code}): {res.text}")
+    with store["lock"]:
+        if not force_refresh and store["access_token"] and store["expires_at"] > time.time() + 60:
+            return store["access_token"]
 
-    data = res.json()
-    access_token = data.get("access_token")
-    expires_in = int(data.get("expires_in", 86400))
+        app_key, app_secret = _get_keys()
 
-    if not access_token:
-        raise KISAPIError(f"KIS 토큰 발급 응답에 access_token이 없습니다: {data}")
+        res = requests.post(
+            f"{BASE_URL}/oauth2/tokenP",
+            json={
+                "grant_type": "client_credentials",
+                "appkey": app_key,
+                "appsecret": app_secret,
+            },
+            timeout=10,
+        )
 
-    st.session_state["kis_token"] = {
-        "access_token": access_token,
-        "expires_at": time.time() + expires_in,
-    }
-    return access_token
+        if res.status_code != 200:
+            raise KISAPIError(f"KIS 토큰 발급 실패 ({res.status_code}): {res.text}")
+
+        data = res.json()
+        access_token = data.get("access_token")
+        expires_in = int(data.get("expires_in", 86400))
+
+        if not access_token:
+            raise KISAPIError(f"KIS 토큰 발급 응답에 access_token이 없습니다: {data}")
+
+        store["access_token"] = access_token
+        store["expires_at"] = time.time() + expires_in
+        return access_token
 
 
 def _headers(tr_id, retry_token=None):
@@ -83,21 +92,51 @@ def _headers(tr_id, retry_token=None):
     }
 
 
-def _request(path, tr_id, params):
-    """401(토큰 만료) 시 토큰을 재발급받아 한 번 더 시도한다."""
+# 모의투자는 초당 호출 제한이 엄격해서, 앱 전체에서 호출 간격을 최소치로 강제한다.
+MIN_REQUEST_INTERVAL = 0.5
 
+
+@st.cache_resource
+def _rate_limiter():
+    return {"last_call": 0.0, "lock": threading.Lock()}
+
+
+def _throttle():
+    limiter = _rate_limiter()
+    with limiter["lock"]:
+        wait = limiter["last_call"] + MIN_REQUEST_INTERVAL - time.time()
+        if wait > 0:
+            time.sleep(wait)
+        limiter["last_call"] = time.time()
+
+
+def _request(path, tr_id, params, _retry_count=0):
+    """401(토큰 만료) 및 초당 호출 제한 초과(EGW00201) 시 자동 재시도한다."""
+
+    _throttle()
     headers = _headers(tr_id)
     res = requests.get(f"{BASE_URL}{path}", headers=headers, params=params, timeout=10)
 
     if res.status_code == 401:
-        st.session_state.pop("kis_token", None)
-        headers = _headers(tr_id)
+        token = get_access_token(force_refresh=True)
+        _throttle()
+        headers = _headers(tr_id, retry_token=token)
         res = requests.get(f"{BASE_URL}{path}", headers=headers, params=params, timeout=10)
+
+    try:
+        data = res.json()
+    except ValueError:
+        data = None
+
+    # 초당 호출 제한(EGW00201)은 HTTP 상태코드가 200이 아닌 경우에도 응답 본문에 담겨 오므로
+    # status_code 체크보다 먼저 확인해서 재시도한다.
+    if isinstance(data, dict) and data.get("msg_cd") == "EGW00201" and _retry_count < 3:
+        time.sleep(1.0)
+        return _request(path, tr_id, params, _retry_count=_retry_count + 1)
 
     if res.status_code != 200:
         raise KISAPIError(f"KIS API 요청 실패 ({res.status_code}): {res.text}")
 
-    data = res.json()
     if data.get("rt_cd") not in (None, "0"):
         raise KISAPIError(f"KIS API 오류 ({data.get('rt_cd')}): {data.get('msg1')}")
 
