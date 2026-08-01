@@ -1,0 +1,7 @@
+streamlit
+pandas
+plotly
+requests
+feedparser
+lxml
+html5lib
