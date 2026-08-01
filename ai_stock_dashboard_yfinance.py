@@ -168,20 +168,20 @@ def generate_ai_opinion(df, news_score, news_label):
     reasons = []
 
     latest = df.iloc[-1]
-    ma5, ma20, ma60 = latest.get("MA5"), latest.get("MA20"), latest.get("MA60")
+    ma5, ma10, ma20 = latest.get("MA5"), latest.get("MA10"), latest.get("MA20")
     close = latest["Close"]
 
-    if pd.notna(ma5) and pd.notna(ma20) and pd.notna(ma60):
-        if ma5 > ma20 > ma60:
+    if pd.notna(ma5) and pd.notna(ma10) and pd.notna(ma20):
+        if ma5 > ma10 > ma20:
             score += 1
             reasons.append(
-                f"이동평균이 정배열(MA5 {ma5:,.0f} > MA20 {ma20:,.0f} > MA60 {ma60:,.0f})을 "
+                f"이동평균이 정배열(MA5 {ma5:,.0f} > MA10 {ma10:,.0f} > MA20 {ma20:,.0f})을 "
                 "보이고 있어 단기 상승 추세로 해석됩니다."
             )
-        elif ma5 < ma20 < ma60:
+        elif ma5 < ma10 < ma20:
             score -= 1
             reasons.append(
-                f"이동평균이 역배열(MA5 {ma5:,.0f} < MA20 {ma20:,.0f} < MA60 {ma60:,.0f})을 "
+                f"이동평균이 역배열(MA5 {ma5:,.0f} < MA10 {ma10:,.0f} < MA20 {ma20:,.0f})을 "
                 "보이고 있어 단기 하락 추세로 해석됩니다."
             )
 
@@ -241,13 +241,14 @@ if refresh:
         st.error("데이터 없음")
         st.stop()
 
-    ma_list = [5, 10, 20, 60, 120]
+    ma_list = [5, 7, 10, 15, 20]
     for ma in ma_list:
         df[f"MA{ma}"] = df["Close"].rolling(ma).mean()
 
     df["ENV_UPPER"] = df["MA20"] * 1.2
     df["ENV_LOWER"] = df["MA20"] * 0.8
     df["Value"] = ((df["Open"] + df["High"] + df["Low"] + df["Close"]) / 4) * df["Volume"]
+    df["Value_억"] = df["Value"] / 1_0000_0000
 
     news_list = get_news(selected_name)
     news_label, news_score = analyze_news(news_list)
@@ -293,15 +294,25 @@ if refresh:
         ), row=1, col=1)
 
         for ma in ma_list:
-            fig.add_trace(go.Scatter(x=df.index, y=df[f"MA{ma}"], name=f"MA{ma}"), row=1, col=1)
+            fig.add_trace(go.Scatter(
+                x=df.index, y=df[f"MA{ma}"], name=f"MA{ma}", hoverinfo="skip",
+            ), row=1, col=1)
 
-        fig.add_trace(go.Scatter(x=df.index, y=df["ENV_UPPER"], name="Env 상단", line=dict(color="black")), row=1, col=1)
-        fig.add_trace(go.Scatter(x=df.index, y=df["ENV_LOWER"], name="Env 하단", line=dict(color="black")), row=1, col=1)
+        fig.add_trace(go.Scatter(
+            x=df.index, y=df["ENV_UPPER"], name="Env 상단", line=dict(color="black"), hoverinfo="skip",
+        ), row=1, col=1)
+        fig.add_trace(go.Scatter(
+            x=df.index, y=df["ENV_LOWER"], name="Env 하단", line=dict(color="black"), hoverinfo="skip",
+        ), row=1, col=1)
 
         fig.add_trace(go.Bar(
-            x=df.index, y=df["Value"], name="거래대금",
-            hovertemplate="%{x}<br>거래대금: %{y:,.0f}원<extra></extra>",
+            x=df.index, y=df["Value_억"], name="거래대금",
+            hovertemplate="%{x}<br>거래대금: %{y:,.0f}억원<extra></extra>",
         ), row=2, col=1)
+
+        fig.update_xaxes(showticklabels=True, rangeslider_visible=False, row=1, col=1)
+        fig.update_xaxes(showticklabels=True, row=2, col=1)
+        fig.update_yaxes(tickformat=",.0f", ticksuffix="억", row=2, col=1)
 
         fig.update_layout(height=650, margin=dict(l=10, r=10, t=30, b=10))
         st.plotly_chart(fig, use_container_width=True)
