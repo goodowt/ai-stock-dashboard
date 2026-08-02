@@ -1,0 +1,46 @@
+name: Envelope lower-band alert
+
+on:
+  schedule:
+    # 09:00~15:45 KST 사이 15분마다(00:00~06:45 UTC), 평일만. 실제 실행 시각은
+    # GitHub Actions 스케줄 특성상 몇 분 정도 밀릴 수 있다.
+    - cron: "*/15 0-6 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: envelope-alert
+  cancel-in-progress: false
+
+jobs:
+  alert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Run alert scan
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/envelope_alert.py
+
+      - name: Commit state file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/alerted_today.json
+          git diff --staged --quiet || git commit -m "Update alert state"
+          git pull --rebase --autostash
+          git push

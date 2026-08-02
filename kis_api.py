@@ -1,13 +1,23 @@
 # kis_api.py
 # 한국투자증권 KIS Open API (모의투자) 래퍼
+#
+# Streamlit 앱(ai_stock_dashboard_yfinance.py)과, Streamlit 없이 도는
+# GitHub Actions 스크립트(scripts/envelope_alert.py) 양쪽에서 공용으로 쓴다.
+# 그래서 키/캐시 저장소는 st.secrets·st.cache_resource에 강하게 의존하지 않고,
+# 있으면 쓰고 없으면 환경변수·모듈 전역 변수로 대체한다.
 
+import os
 import threading
 import time
 from datetime import datetime, timedelta
 
 import pandas as pd
 import requests
-import streamlit as st
+
+try:
+    import streamlit as st
+except ImportError:
+    st = None
 
 # 모의투자 도메인 (실전 계좌는 openapi.koreainvestment.com:9443)
 BASE_URL = "https://openapivts.koreainvestment.com:29443"
@@ -22,29 +32,44 @@ class KISAPIError(Exception):
 
 
 def _get_keys():
-    try:
-        app_key = st.secrets["KIS_APP_KEY"]
-        app_secret = st.secrets["KIS_APP_SECRET"]
-    except (KeyError, FileNotFoundError):
-        raise KISAPIError(
-            "KIS API 키가 설정되지 않았습니다. `.streamlit/secrets.toml`에 "
-            "KIS_APP_KEY / KIS_APP_SECRET을 입력해주세요."
-        )
+    if st is not None:
+        try:
+            app_key = st.secrets["KIS_APP_KEY"]
+            app_secret = st.secrets["KIS_APP_SECRET"]
+            if app_key and app_secret:
+                return app_key, app_secret
+        except Exception:
+            pass
+
+    app_key = os.environ.get("KIS_APP_KEY")
+    app_secret = os.environ.get("KIS_APP_SECRET")
     if not app_key or not app_secret:
-        raise KISAPIError("KIS_APP_KEY / KIS_APP_SECRET 값이 비어 있습니다.")
+        raise KISAPIError(
+            "KIS API 키가 설정되지 않았습니다. `.streamlit/secrets.toml`(앱) 또는 "
+            "환경변수(스크립트)에 KIS_APP_KEY / KIS_APP_SECRET을 설정해주세요."
+        )
     return app_key, app_secret
 
 
-@st.cache_resource
+# 세션(session_state)이 아니라 프로세스 전체가 공유하는 저장소.
+# KIS 토큰 발급은 앱키 기준 1분당 1회 제한이라, 세션/실행별로 따로 캐싱하면
+# 동시 접속자·반복 실행이 늘어날 때마다 재발급이 충돌해 403이 난다.
+# 모듈 전역 변수는 같은 프로세스(Streamlit 서버 하나, 혹은 스크립트 한 번 실행) 안에서
+# 자연히 공유되므로 st.cache_resource 없이도 동일하게 동작한다.
+_token_store_singleton = {"access_token": None, "expires_at": 0.0, "lock": threading.RLock()}
+
+
 def _token_store():
-    # 세션(session_state)이 아니라 앱 프로세스 전체가 공유하는 저장소.
-    # KIS 토큰 발급은 앱키 기준 1분당 1회 제한이라, 세션별로 따로 캐싱하면
-    # 동시 접속자가 늘어날 때마다 재발급이 충돌해 403이 난다.
-    return {"access_token": None, "expires_at": 0.0, "lock": threading.Lock()}
+    return _token_store_singleton
 
 
-def get_access_token(force_refresh=False):
-    """OAuth 토큰을 앱 전체에서 공유 캐싱하고, 만료 전까지 재사용한다."""
+def get_access_token(force_refresh=False, _retry_count=0):
+    """OAuth 토큰을 앱 전체에서 공유 캐싱하고, 만료 전까지 재사용한다.
+
+    앱(Streamlit 세션)과 GitHub Actions 스크립트가 같은 앱키를 쓰다 보면
+    1분당 1회 제한(EGW00133)에 우연히 동시에 걸릴 수 있어, 그 경우 한 번은
+    65초 기다렸다가 자동 재시도한다(대화형 앱이 아닌 배치 스크립트에도 쓰이므로 허용).
+    """
 
     store = _token_store()
 
@@ -65,6 +90,9 @@ def get_access_token(force_refresh=False):
         )
 
         if res.status_code != 200:
+            if "EGW00133" in res.text and _retry_count < 1:
+                time.sleep(65)
+                return get_access_token(force_refresh=force_refresh, _retry_count=_retry_count + 1)
             raise KISAPIError(f"KIS 토큰 발급 실패 ({res.status_code}): {res.text}")
 
         data = res.json()
@@ -96,9 +124,11 @@ def _headers(tr_id, retry_token=None):
 MIN_REQUEST_INTERVAL = 0.5
 
 
-@st.cache_resource
+_rate_limiter_singleton = {"last_call": 0.0, "lock": threading.Lock()}
+
+
 def _rate_limiter():
-    return {"last_call": 0.0, "lock": threading.Lock()}
+    return _rate_limiter_singleton
 
 
 def _throttle():
@@ -173,6 +203,8 @@ def fetch_current_price(code: str) -> dict:
         "52주최고": to_float("w52_hgpr"),
         "52주최저": to_float("w52_lwpr"),
         "시가총액": to_float("hts_avls"),
+        "오늘저가": to_float("stck_lwpr"),
+        "오늘고가": to_float("stck_hgpr"),
     }
 
 
