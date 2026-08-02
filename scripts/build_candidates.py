@@ -26,7 +26,7 @@ OUTPUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "candidat
 
 def load_tickers():
     tickers = []
-    with open(TICKERS_CSV, encoding="utf-8") as f:
+    with open(TICKERS_CSV, encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
             name = row["회사명"]
             ticker = row["티커"]
