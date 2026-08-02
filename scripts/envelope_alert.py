@@ -49,13 +49,18 @@ def save_state(state):
 
 
 def send_telegram(text):
+    """전송 성공 여부를 bool로 반환한다. 실패하면 알림 대상을 '이미 보냄'으로
+    기록하면 안 되므로(다음 실행에서 재시도해야 하므로), 성공 여부를 호출부에 알려준다."""
+
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         print("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID가 설정되지 않아 알림을 보낼 수 없습니다.")
-        return
+        return False
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     res = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": text}, timeout=10)
     if res.status_code != 200:
         print(f"텔레그램 전송 실패: {res.status_code} {res.text}")
+        return False
+    return True
 
 
 def main():
@@ -82,7 +87,6 @@ def main():
 
         if today_low <= c["env_lower"]:
             new_hits.append({**c, "today_low": today_low, "current_price": info["현재가"]})
-            alerted.add(c["code"])
 
     if new_hits:
         lines = [f"📉 Envelope 하단 터치 종목 ({len(new_hits)}개, 시가총액 1.2조 이상)", ""]
@@ -92,8 +96,12 @@ def main():
                 f"  오늘 저가 {h['today_low']:,.0f} / 현재가 {h['current_price']:,.0f} "
                 f"/ Envelope 하단 {h['env_lower']:,.0f}"
             )
-        send_telegram("\n".join(lines))
-        print(f"{len(new_hits)}개 종목 알림 발송 완료")
+        sent = send_telegram("\n".join(lines))
+        if sent:
+            alerted.update(h["code"] for h in new_hits)
+            print(f"{len(new_hits)}개 종목 알림 발송 완료")
+        else:
+            print(f"{len(new_hits)}개 종목 알림 발송 실패 (다음 실행에서 재시도됩니다)")
     else:
         print("신규로 Envelope 하단을 터치한 종목이 없습니다.")
 
