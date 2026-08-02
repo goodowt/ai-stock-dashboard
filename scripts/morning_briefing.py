@@ -5,6 +5,7 @@
 # 경제지표 관련 주요 뉴스를 모아 텔레그램으로 요약 발송한다.
 # LLM을 쓰지 않는 규칙 기반 다이제스트라 별도 API 비용이 들지 않는다.
 
+import html
 import os
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
@@ -57,6 +58,9 @@ def fetch_change(ticker):
 
 
 def format_line(label, result, prefix="", decimals=2):
+    # parse_mode=HTML로 보내므로 &, <, > 등은 반드시 이스케이프해야 한다
+    # (예: "S&P500"의 '&'가 그대로 있으면 텔레그램이 메시지 전체를 거부한다).
+    label = html.escape(label)
     if result is None:
         return f"{label}: 조회 실패"
     value, pct = result
@@ -78,7 +82,12 @@ def send_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     res = requests.post(
         url,
-        json={"chat_id": TELEGRAM_CHAT_ID, "text": text, "disable_web_page_preview": True},
+        json={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        },
         timeout=10,
     )
     if res.status_code != 200:
@@ -110,9 +119,9 @@ def build_message():
         news = fetch_news(query)
         if not news:
             continue
-        lines.append(f"[{topic}]")
+        lines.append(f"[{html.escape(topic)}]")
         for n in news:
-            lines.append(f"- {n['title']}")
+            lines.append(f'- <a href="{n["link"]}">{html.escape(n["title"])}</a>')
         lines.append("")
 
     return "\n".join(lines).strip()
