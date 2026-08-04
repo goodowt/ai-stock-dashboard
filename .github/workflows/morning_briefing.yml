@@ -2,8 +2,9 @@ name: Morning briefing
 
 on:
   schedule:
-    # 07:30 KST(평일) = 22:30 UTC(일~목요일)
-    - cron: "30 22 * * 0-4"
+    # 07:23 KST(평일) = 22:23 UTC(일~목요일)
+    # 정각/30분처럼 몰리는 시각을 피해 GitHub Actions 스케줄 지연을 줄이기 위해 23분으로 설정
+    - cron: "23 22 * * 0-4"
   workflow_dispatch: {}
 
 permissions:
