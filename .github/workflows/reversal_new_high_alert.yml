@@ -1,0 +1,39 @@
+name: Reversal 60-day new high alert
+
+on:
+  schedule:
+    # 매일 17:00 KST(build_candidates.py의 15:50 실행과 겹치지 않도록 여유를 둠)
+    # = 08:00 UTC, 평일만
+    - cron: "0 8 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reversal-new-high-alert
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    # 코스피+코스닥 전 종목(약 2,700개)을 종목당 1회씩 조회하므로
+    # build_candidates.py와 비슷하게 오래 걸릴 수 있어 넉넉히 잡는다.
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Run reversal new-high scan
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scripts/reversal_new_high_alert.py
