@@ -1,0 +1,47 @@
+name: Breakout watchlist scan
+
+on:
+  schedule:
+    # 매일 16:00 KST = 07:00 UTC, 평일만. reversal_new_high_alert.yml(17:00 KST)와
+    # 시간대가 겹칠 수 있으나, 둘 다 KIS API 초당 호출 제한 재시도 로직이 있어
+    # 동시 실행 자체는 문제되지 않는다(다소 느려질 수는 있음).
+    - cron: "0 7 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: breakout-watchlist-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    # 코스피+코스닥 전 종목(약 2,700개)을 종목당 1회씩 조회하므로
+    # reversal_new_high_alert.py와 비슷하게 오래 걸릴 수 있어 넉넉히 잡는다.
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Run breakout watchlist scan
+        env:
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+        run: python scripts/breakout_watchlist_scan.py
+
+      - name: Commit watchlist state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/watchlist_breakout.json
+          git diff --staged --quiet || git commit -m "Update breakout watchlist"
+          git pull --rebase --autostash
+          git push
