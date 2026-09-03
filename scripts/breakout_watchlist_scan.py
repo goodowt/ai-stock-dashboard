@@ -5,10 +5,9 @@
 # (2) 오늘 캔들이 양봉(종가 > 시가)이며
 # (3) 전일 종가 대비 등락률이 15% 이상이고
 # (4) 오늘 거래대금(거래량 x 종가로 추정)이 1000억원 이상인
-# 종목을 찾아 watchlist_breakout.json에 등록한다. 이 목록은
-# breakout_ma_monitor.py가 장중에 주기적으로 읽어, 각 종목이 5일선/10일선을
-# 이탈하는 순간을 감지해 텔레그램으로 알린다(그 알림 자체는 이 스크립트가
-# 아니라 breakout_ma_monitor.py가 보낸다).
+# 종목을 찾아 watchlist_breakout.json에 등록하고, 신규 등록 종목을 텔레그램으로도
+# 알린다. 이 목록은 breakout_ma_monitor.py가 장중에 주기적으로 읽어, 각 종목이
+# 5일선/10일선을 이탈하는 순간을 별도로 감지해 다시 텔레그램으로 알린다.
 #
 # 전 종목을 대상으로 종목당 일봉 조회를 1회씩 하므로(약 2,700개), reversal_new_high_alert.py와
 # 마찬가지로 실행에 시간이 오래 걸릴 수 있다.
@@ -19,6 +18,7 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 import pandas as pd
+import requests
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +35,21 @@ MIN_TURNOVER = 100_000_000_000  # 거래대금 1000억원
 EXPIRE_DAYS = 120  # 이 기간(달력일) 안에 5일/10일선을 모두 이탈하지 않으면 감시 목록에서 자동 제거
 
 STATE_PATH = os.path.join(SCRIPT_DIR, "watchlist_breakout.json")
+
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+
+
+def send_telegram(text):
+    if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
+        print("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID가 설정되지 않아 알림을 보낼 수 없습니다.")
+        return False
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    res = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": text}, timeout=10)
+    if res.status_code != 200:
+        print(f"텔레그램 전송 실패: {res.status_code} {res.text}")
+        return False
+    return True
 
 
 def load_state():
@@ -137,6 +152,28 @@ def main():
             print(f"[{i + 1}/{len(tickers)}] 진행 중 (신규 발견 {len(new_hits)}개)")
 
     print(f"스캔 완료: 신규 {len(new_hits)}개, 기존 감시 중 {len(items)}개")
+
+    if new_hits:
+        new_hits.sort(key=lambda h: h["trigger_change_pct"], reverse=True)
+        MAX_LINES = 30
+        lines = [
+            f"🚀 전고점 돌파 감시 목록 신규 등록 ({len(new_hits)}개)",
+            f"3개월 전고점을 거래대금 1000억+ / {MIN_CHANGE_PCT:.0f}%+ 양봉으로 돌파한 종목입니다.",
+            "5일선·10일선을 이탈하면 별도로 알려드립니다.",
+            "",
+        ]
+        for h in new_hits[:MAX_LINES]:
+            lines.append(
+                f"• {h['name']}({h['code']}, {h['market']})\n"
+                f"  종가 {h['trigger_close']:,.0f} ({h['trigger_change_pct']:+.2f}%) / "
+                f"거래대금 {h['trigger_turnover'] / 100_000_000:,.0f}억 / "
+                f"3개월 전고점 {h['prior_3m_high']:,.0f}"
+            )
+        if len(new_hits) > MAX_LINES:
+            lines.append(f"\n...외 {len(new_hits) - MAX_LINES}개 더")
+
+        sent = send_telegram("\n".join(lines))
+        print("신규 등록 알림 발송 완료" if sent else "신규 등록 알림 발송 실패")
 
     items.extend(new_hits)
     state["items"] = items
