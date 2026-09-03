@@ -1,3 +1,16 @@
 {
-  "items": []
+  "items": [
+    {
+      "name": "녹십자웰빙",
+      "code": "234690",
+      "market": "KOSDAQ",
+      "trigger_date": "2026-09-04",
+      "trigger_close": 10750.0,
+      "trigger_change_pct": 16.468039003250272,
+      "trigger_turnover": 113503197750.0,
+      "prior_3m_high": 9680.0,
+      "alerted_5d": false,
+      "alerted_10d": false
+    }
+  ]
 }
