@@ -140,18 +140,40 @@ def _throttle():
         limiter["last_call"] = time.time()
 
 
+MAX_NETWORK_RETRIES = 3
+
+
+def _get(url, headers, params, _retry_count=0):
+    """requests.get()을 네트워크 순단(ConnectionError, Timeout 등) 시 재시도한다.
+
+    breakout_watchlist_scan.py / reversal_new_high_alert.py처럼 종목 2,700개를
+    순회하는 배치 스크립트는 한 시간 넘게 요청을 반복하는데, 그 사이 KIS 서버가
+    연결을 한 번만 끊어도(RemoteDisconnected 등) 이 예외가 KISAPIError가 아니라서
+    호출부의 `except kis_api.KISAPIError`에 잡히지 않고 스크립트 전체가 죽어버린다.
+    실제로 이 문제로 배치가 중간에 exit code 1로 죽는 사고가 있었다.
+    """
+
+    try:
+        return requests.get(url, headers=headers, params=params, timeout=10)
+    except requests.exceptions.RequestException as e:
+        if _retry_count < MAX_NETWORK_RETRIES:
+            time.sleep(2.0)
+            return _get(url, headers, params, _retry_count=_retry_count + 1)
+        raise KISAPIError(f"KIS API 네트워크 오류: {e}")
+
+
 def _request(path, tr_id, params, _retry_count=0):
-    """401(토큰 만료) 및 초당 호출 제한 초과(EGW00201) 시 자동 재시도한다."""
+    """401(토큰 만료), 초당 호출 제한 초과(EGW00201), 네트워크 순단 시 자동 재시도한다."""
 
     _throttle()
     headers = _headers(tr_id)
-    res = requests.get(f"{BASE_URL}{path}", headers=headers, params=params, timeout=10)
+    res = _get(f"{BASE_URL}{path}", headers, params)
 
     if res.status_code == 401:
         token = get_access_token(force_refresh=True)
         _throttle()
         headers = _headers(tr_id, retry_token=token)
-        res = requests.get(f"{BASE_URL}{path}", headers=headers, params=params, timeout=10)
+        res = _get(f"{BASE_URL}{path}", headers, params)
 
     try:
         data = res.json()
