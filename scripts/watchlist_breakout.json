@@ -16,7 +16,7 @@
       "name": "원익",
       "code": "032940",
       "market": "KOSDAQ",
-      "trigger_date": "2026-09-06",
+      "trigger_date": "2026-09-04",
       "trigger_close": 10050.0,
       "trigger_change_pct": 17.132867132867133,
       "trigger_turnover": 147617123550.0,
