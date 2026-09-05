@@ -104,7 +104,11 @@ def check_ticker(t, start, today):
 
     return {
         **t,
-        "trigger_date": today.isoformat(),
+        # 실행 시각의 달력 날짜(today)가 아니라, 실제로 조건을 만족한 캔들의
+        # 거래일을 기록한다. 장 시작 전 새벽에 돌리거나 주말에 재실행하면
+        # today와 최신 거래일이 달라질 수 있어서(예: 일요일에 실행해도 데이터는
+        # 금요일자가 최신), today를 쓰면 라벨이 실제 발생일과 어긋난다.
+        "trigger_date": df.index[-1].date().isoformat(),
         "trigger_close": float(latest["Close"]),
         "trigger_change_pct": float(change_pct),
         "trigger_turnover": float(turnover),
