@@ -11,6 +11,13 @@
 #
 # 전 종목을 대상으로 종목당 일봉 조회를 1회씩 하므로(약 2,700개), reversal_new_high_alert.py와
 # 마찬가지로 실행에 시간이 오래 걸릴 수 있다.
+#
+# 종목별로 "마지막까지 확인한 거래일"을 last_scanned에 체크포인트로 기록해두고,
+# 다음 실행에서는 그 이후의 거래일만 새로 검사한다. 스캔이 중간에 죽거나(예: KIS
+# 연결 끊김) 하루이틀 실행을 못 해도, 그 사이 놓친 거래일의 돌파를 다음 실행이
+# 되짚어서 잡아내기 위함이다(실제로 이 문제로 종목 하나를 놓친 적이 있음). 다만
+# 체크포인트가 아주 오래됐거나 아예 없어도 최대 MAX_LOOKBACK_DAYS거래일까지만
+# 거슬러 올라간다(무한정 과거를 훑지 않도록).
 
 import json
 import os
@@ -33,6 +40,7 @@ FETCH_DAYS = 130  # 60거래일을 넉넉히 확보하기 위한 조회 캘린�
 MIN_CHANGE_PCT = 15.0  # 전일 종가 대비 최소 등락률(%)
 MIN_TURNOVER = 100_000_000_000  # 거래대금 1000억원
 EXPIRE_DAYS = 120  # 이 기간(달력일) 안에 5일/10일선을 모두 이탈하지 않으면 감시 목록에서 자동 제거
+MAX_LOOKBACK_DAYS = 5  # 체크포인트가 없거나 오래됐어도 최대 이 거래일 수까지만 되짚어본다
 
 STATE_PATH = os.path.join(SCRIPT_DIR, "watchlist_breakout.json")
 
@@ -55,8 +63,11 @@ def send_telegram(text):
 def load_state():
     if os.path.exists(STATE_PATH):
         with open(STATE_PATH, encoding="utf-8") as f:
-            return json.load(f)
-    return {"items": []}
+            state = json.load(f)
+            state.setdefault("items", [])
+            state.setdefault("last_scanned", {})
+            return state
+    return {"items": [], "last_scanned": {}}
 
 
 def save_state(state):
@@ -64,21 +75,16 @@ def save_state(state):
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
-def check_ticker(t, start, today):
-    """전고점 돌파 + 양봉 + 등락률 15%+ + 거래대금 1000억+ 조건을 만족하면 결과 dict를, 아니면 None을 반환."""
+def _evaluate_day(df, i):
+    """df의 i번째 캔들이 전고점 돌파 + 양봉 + 등락률 15%+ + 거래대금 1000억+ 조건을
+    만족하면 결과 dict를, 아니면 None을 반환한다. i 이전에 WINDOW거래일치 히스토리가
+    있어야 하므로 i >= WINDOW여야 한다."""
 
-    try:
-        df = kis_api.fetch_daily_chart(t["code"], start, today)
-    except kis_api.KISAPIError as e:
-        print(f"{t['name']}({t['code']}) 차트 조회 실패: {e}")
+    if i < WINDOW:
         return None
 
-    # 오늘 + 직전 WINDOW거래일 + 등락률 계산용 전일 1개, 최소한 이만큼은 있어야 함
-    if len(df) < WINDOW + 1:
-        return None
-
-    latest = df.iloc[-1]
-    prev_close = df["Close"].iloc[-2]
+    latest = df.iloc[i]
+    prev_close = df["Close"].iloc[i - 1]
 
     # 양봉: 종가가 시가보다 높음
     if not (latest["Close"] > latest["Open"]):
@@ -96,19 +102,14 @@ def check_ticker(t, start, today):
     if turnover < MIN_TURNOVER:
         return None
 
-    # 오늘 이전 직전 WINDOW거래일 중 최고 종가(전고점)를 오늘 종가가 돌파했는지
-    prior_window_close = df["Close"].iloc[-(WINDOW + 1):-1]
+    # 그날 이전 직전 WINDOW거래일 중 최고 종가(전고점)를 그날 종가가 돌파했는지
+    prior_window_close = df["Close"].iloc[i - WINDOW:i]
     prior_high = prior_window_close.max()
     if latest["Close"] <= prior_high:
         return None
 
     return {
-        **t,
-        # 실행 시각의 달력 날짜(today)가 아니라, 실제로 조건을 만족한 캔들의
-        # 거래일을 기록한다. 장 시작 전 새벽에 돌리거나 주말에 재실행하면
-        # today와 최신 거래일이 달라질 수 있어서(예: 일요일에 실행해도 데이터는
-        # 금요일자가 최신), today를 쓰면 라벨이 실제 발생일과 어긋난다.
-        "trigger_date": df.index[-1].date().isoformat(),
+        "trigger_date": df.index[i].date().isoformat(),
         "trigger_close": float(latest["Close"]),
         "trigger_change_pct": float(change_pct),
         "trigger_turnover": float(turnover),
@@ -116,6 +117,45 @@ def check_ticker(t, start, today):
         "alerted_5d": False,
         "alerted_10d": False,
     }
+
+
+def check_ticker(t, start, today, last_scanned_date=None):
+    """조건을 만족하는 가장 최근 거래일을 찾아 (결과 dict 또는 None, 최신 확인된
+    거래일 문자열) 튜플로 반환한다.
+
+    last_scanned_date(그 종목을 마지막으로 확인했던 거래일)가 주어지면 그 이후의
+    거래일만 새로 검사해서, 스캔이 하루이틀 못 돌았어도 그 사이 놓친 날짜의
+    돌파를 되짚어 잡아낸다. 체크포인트가 없거나 아주 오래됐어도 최대
+    MAX_LOOKBACK_DAYS거래일까지만 거슬러 올라간다.
+    """
+
+    try:
+        df = kis_api.fetch_daily_chart(t["code"], start, today)
+    except kis_api.KISAPIError as e:
+        print(f"{t['name']}({t['code']}) 차트 조회 실패: {e}")
+        return None, None
+
+    if len(df) < WINDOW + 1:
+        return None, None
+
+    latest_checked_date = df.index[-1].date().isoformat()
+
+    if last_scanned_date:
+        last_dt = datetime.fromisoformat(last_scanned_date).date()
+        after = [i for i in range(len(df)) if df.index[i].date() > last_dt]
+        if not after:
+            # 마지막 확인 이후 새로 생긴 거래일이 없음 - 다시 볼 필요 없음
+            return None, latest_checked_date
+        candidate_start = max(after[0], len(df) - MAX_LOOKBACK_DAYS, WINDOW)
+    else:
+        candidate_start = max(len(df) - MAX_LOOKBACK_DAYS, WINDOW)
+
+    for i in range(len(df) - 1, candidate_start - 1, -1):
+        hit = _evaluate_day(df, i)
+        if hit:
+            return {**t, **hit}, latest_checked_date
+
+    return None, latest_checked_date
 
 
 def main():
@@ -136,6 +176,7 @@ def main():
     items = kept
 
     existing_codes = {it["code"] for it in items}
+    last_scanned = state.get("last_scanned", {})
 
     tickers = bc.load_tickers()
     print(f"전체 종목 수: {len(tickers)}")
@@ -147,10 +188,13 @@ def main():
         if t["code"] in existing_codes:
             continue
 
-        result = check_ticker(t, start, today)
+        result, checked_date = check_ticker(t, start, today, last_scanned.get(t["code"]))
+        if checked_date:
+            last_scanned[t["code"]] = checked_date
         if result:
             new_hits.append(result)
-            print(f"[{i + 1}/{len(tickers)}] {t['name']}({t['code']}) 조건 충족 -> 감시 목록 등록")
+            existing_codes.add(t["code"])
+            print(f"[{i + 1}/{len(tickers)}] {t['name']}({t['code']}) 조건 충족 ({result['trigger_date']}) -> 감시 목록 등록")
 
         if (i + 1) % 200 == 0:
             print(f"[{i + 1}/{len(tickers)}] 진행 중 (신규 발견 {len(new_hits)}개)")
@@ -181,6 +225,7 @@ def main():
 
     items.extend(new_hits)
     state["items"] = items
+    state["last_scanned"] = last_scanned
     save_state(state)
 
 
