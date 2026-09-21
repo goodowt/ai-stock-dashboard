@@ -1,30 +1,6 @@
 {
   "items": [
     {
-      "name": "삼미금속",
-      "code": "012210",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-07",
-      "trigger_close": 10200.0,
-      "trigger_change_pct": 22.15568862275449,
-      "trigger_turnover": 176315608800.0,
-      "prior_3m_high": 10130.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
-      "name": "현대약품",
-      "code": "004310",
-      "market": "KOSPI",
-      "trigger_date": "2026-09-08",
-      "trigger_close": 10440.0,
-      "trigger_change_pct": 23.990498812351543,
-      "trigger_turnover": 336550208400.0,
-      "prior_3m_high": 8500.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "한국화장품제조",
       "code": "003350",
       "market": "KOSPI",
@@ -57,7 +33,7 @@
       "trigger_change_pct": 19.848293299620735,
       "trigger_turnover": 152937920160.0,
       "prior_3m_high": 9010.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
@@ -69,7 +45,7 @@
       "trigger_change_pct": 29.980657640232106,
       "trigger_turnover": 146744347680.0,
       "prior_3m_high": 3080.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
