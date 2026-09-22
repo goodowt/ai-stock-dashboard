@@ -9,7 +9,7 @@
       "trigger_change_pct": 19.376899696048632,
       "trigger_turnover": 185353618080.0,
       "prior_3m_high": 14970.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
@@ -21,18 +21,6 @@
       "trigger_change_pct": 30.0,
       "trigger_turnover": 297540714640.0,
       "prior_3m_high": 9930.0,
-      "alerted_5d": false,
-      "alerted_10d": false
-    },
-    {
-      "name": "삼익제약",
-      "code": "014950",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-14",
-      "trigger_close": 9480.0,
-      "trigger_change_pct": 19.848293299620735,
-      "trigger_turnover": 152937920160.0,
-      "prior_3m_high": 9010.0,
       "alerted_5d": true,
       "alerted_10d": false
     },
@@ -93,7 +81,7 @@
       "trigger_change_pct": 18.489583333333336,
       "trigger_turnover": 345576831600.0,
       "prior_3m_high": 3840.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
