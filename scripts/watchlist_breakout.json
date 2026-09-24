@@ -13,18 +13,6 @@
       "alerted_10d": false
     },
     {
-      "name": "광전자",
-      "code": "017900",
-      "market": "KOSPI",
-      "trigger_date": "2026-09-14",
-      "trigger_close": 10270.0,
-      "trigger_change_pct": 30.0,
-      "trigger_turnover": 297540714640.0,
-      "prior_3m_high": 9930.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "한국첨단소재",
       "code": "062970",
       "market": "KOSDAQ",
