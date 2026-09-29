@@ -1,18 +1,6 @@
 {
   "items": [
     {
-      "name": "한국화장품제조",
-      "code": "003350",
-      "market": "KOSPI",
-      "trigger_date": "2026-09-11",
-      "trigger_close": 15710.0,
-      "trigger_change_pct": 19.376899696048632,
-      "trigger_turnover": 185353618080.0,
-      "prior_3m_high": 14970.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "한국첨단소재",
       "code": "062970",
       "market": "KOSDAQ",
@@ -33,7 +21,7 @@
       "trigger_change_pct": 18.493150684931507,
       "trigger_turnover": 258490233600.0,
       "prior_3m_high": 24900.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
@@ -61,18 +49,6 @@
       "alerted_10d": false
     },
     {
-      "name": "미투온",
-      "code": "201490",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-17",
-      "trigger_close": 4550.0,
-      "trigger_change_pct": 18.489583333333336,
-      "trigger_turnover": 345576831600.0,
-      "prior_3m_high": 3840.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "비츠로테크",
       "code": "042370",
       "market": "KOSDAQ",
@@ -82,18 +58,6 @@
       "trigger_turnover": 102131824080.0,
       "prior_3m_high": 9740.0,
       "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
-      "name": "우리로",
-      "code": "046970",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-18",
-      "trigger_close": 8140.0,
-      "trigger_change_pct": 15.954415954415953,
-      "trigger_turnover": 161457876800.0,
-      "prior_3m_high": 7240.0,
-      "alerted_5d": false,
       "alerted_10d": false
     },
     {
@@ -129,18 +93,6 @@
       "trigger_change_pct": 17.627494456762747,
       "trigger_turnover": 294160976800.0,
       "prior_3m_high": 9020.0,
-      "alerted_5d": false,
-      "alerted_10d": false
-    },
-    {
-      "name": "삼미금속",
-      "code": "012210",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-22",
-      "trigger_close": 13330.0,
-      "trigger_change_pct": 19.87410071942446,
-      "trigger_turnover": 309510776290.0,
-      "prior_3m_high": 13030.0,
       "alerted_5d": false,
       "alerted_10d": false
     },
