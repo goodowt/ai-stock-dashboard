@@ -1,12 +1,17 @@
 # ai_stock_dashboard_yfinance.py
 
+import html
+
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import feedparser
 
+import dart_api
+import investment_opinion
 import kis_api
+from dart_api import DARTAPIError
 from kis_api import KISAPIError
 
 st.set_page_config(page_title="AI 주식 대시보드", layout="wide")
@@ -36,6 +41,15 @@ st.markdown("""
 .opinion-buy { background-color: rgba(212,63,63,0.15); color: #d43f3f; }
 .opinion-sell { background-color: rgba(63,111,212,0.15); color: #3f6fd4; }
 .opinion-neutral { background-color: rgba(127,127,127,0.18); color: #808080; }
+.opinion-total { margin-left: 8px; font-weight: 700; }
+.opinion-cat {
+    border-top: 1px solid rgba(127,127,127,0.25);
+    margin-top: 10px;
+    padding-top: 8px;
+}
+.opinion-cat-head { display: flex; justify-content: space-between; font-weight: 700; }
+.opinion-cat ul { margin: 4px 0 0 0; padding-left: 18px; font-size: 0.9rem; }
+.opinion-skip { opacity: 0.6; font-weight: 400; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -161,69 +175,22 @@ def analyze_news(news_list):
         return "➖ 중립", 0
 
 # ----------------------
-# AI 투자의견 (규칙 기반 기술적 신호)
+# 재무제표 + 공시 (DART)
 # ----------------------
-def generate_ai_opinion(df, news_score, news_label):
-    score = 0
-    reasons = []
+DISCLOSURE_DAYS = 90
 
-    latest = df.iloc[-1]
-    ma5, ma10, ma20 = latest.get("MA5"), latest.get("MA10"), latest.get("MA20")
-    close = latest["Close"]
+@st.cache_data(ttl=3600, show_spinner=False)
+def load_fundamentals(code):
+    corp_code = dart_api.fetch_corp_code(code)
+    if corp_code is None:
+        return None, None
+    return (
+        dart_api.fetch_financials(corp_code),
+        dart_api.fetch_disclosures(corp_code, DISCLOSURE_DAYS),
+    )
 
-    if pd.notna(ma5) and pd.notna(ma10) and pd.notna(ma20):
-        if ma5 > ma10 > ma20:
-            score += 1
-            reasons.append(
-                f"이동평균이 정배열(MA5 {ma5:,.0f} > MA10 {ma10:,.0f} > MA20 {ma20:,.0f})을 "
-                "보이고 있어 단기 상승 추세로 해석됩니다."
-            )
-        elif ma5 < ma10 < ma20:
-            score -= 1
-            reasons.append(
-                f"이동평균이 역배열(MA5 {ma5:,.0f} < MA10 {ma10:,.0f} < MA20 {ma20:,.0f})을 "
-                "보이고 있어 단기 하락 추세로 해석됩니다."
-            )
-
-    if pd.notna(ma5) and pd.notna(ma20) and len(df) >= 4:
-        diff = df["MA5"] - df["MA20"]
-        recent_diff = diff.tail(4)
-        if recent_diff.iloc[0] < 0 and recent_diff.iloc[-1] > 0:
-            score += 1
-            reasons.append("최근 3거래일 이내 MA5가 MA20을 상향 돌파하는 골든크로스가 발생했습니다.")
-        elif recent_diff.iloc[0] > 0 and recent_diff.iloc[-1] < 0:
-            score -= 1
-            reasons.append("최근 3거래일 이내 MA5가 MA20을 하향 돌파하는 데드크로스가 발생했습니다.")
-
-    upper, lower = latest.get("ENV_UPPER"), latest.get("ENV_LOWER")
-    if pd.notna(upper) and close >= upper * 0.98:
-        score -= 1
-        reasons.append(f"현재가({close:,.0f})가 Envelope 상단({upper:,.0f})에 근접해 단기 과열 구간으로 판단됩니다.")
-    elif pd.notna(lower) and close <= lower * 1.02:
-        score += 1
-        reasons.append(f"현재가({close:,.0f})가 Envelope 하단({lower:,.0f})에 근접해 단기 저평가 구간으로 판단됩니다.")
-
-    if news_score != 0:
-        reasons.append(
-            f"최근 뉴스 감성분석 결과가 '{news_label}'로 나타나 "
-            f"{'긍정적' if news_score > 0 else '부정적'} 요인으로 반영됩니다."
-        )
-    score += news_score
-
-    if score >= 2:
-        label, css = "🔥 매수 우위", "opinion-buy"
-        verdict = "매수 신호가 매도 신호보다 우세하여 '매수 우위'로 판단됩니다."
-    elif score <= -2:
-        label, css = "⚠️ 매도 우위", "opinion-sell"
-        verdict = "매도 신호가 매수 신호보다 우세하여 '매도 우위'로 판단됩니다."
-    else:
-        label, css = "➖ 중립", "opinion-neutral"
-        verdict = "매수·매도 신호가 뚜렷하지 않거나 서로 엇갈려 '중립'으로 판단됩니다."
-
-    if not reasons:
-        reasons = ["뚜렷한 기술적 매수/매도 신호가 관측되지 않았습니다."]
-
-    return label, css, reasons, verdict
+def format_ratio(value, suffix, digits=1):
+    return f"{value:,.{digits}f}{suffix}" if value else "-"
 
 # ----------------------
 # 실행
@@ -252,6 +219,18 @@ if refresh:
 
     news_list = get_news(selected_name)
     news_label, news_score = analyze_news(news_list)
+
+    financials, disclosures, dart_notice = None, None, None
+    if not dart_api.has_key():
+        dart_notice = "DART_API_KEY가 설정되지 않아 실적·공시 분석은 제외했습니다."
+    else:
+        try:
+            financials, disclosures = load_fundamentals(code)
+        except DARTAPIError as e:
+            dart_notice = f"DART 조회에 실패해 실적·공시 분석은 제외했습니다. ({e})"
+        else:
+            if financials is None and disclosures is None:
+                dart_notice = "DART에 등록된 기업이 아니어서(ETF 등) 실적·공시 분석은 제외했습니다."
 
     # ----------------------
     # 상단 요약 스트립
@@ -318,19 +297,96 @@ if refresh:
         st.plotly_chart(fig, use_container_width=True)
 
     with col_side:
-        label, css, reasons, verdict = generate_ai_opinion(df, news_score, news_label)
+        opinion = investment_opinion.generate_opinion(
+            df, news_score, news_label, price_info, financials, disclosures, DISCLOSURE_DAYS
+        )
 
-        st.markdown(f"""
-        <div class="hts-card">
-            <h4>🤖 AI 투자의견</h4>
-            <span class="opinion-badge {css}">{label}</span>
-            <ul style="margin-top:10px;">{"".join(f"<li>{r}</li>" for r in reasons)}</ul>
-            <div style="font-weight:700; margin-top:6px;">→ {verdict}</div>
-            <div style="font-size:0.8rem; opacity:0.7; margin-top:8px;">
-                본 의견은 기술적 지표 기반 참고용이며 투자 조언이 아닙니다.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        category_html = ""
+        for category in opinion["categories"]:
+            if not category["available"]:
+                score_html = '<span class="opinion-skip">평가 제외</span>'
+            else:
+                score_class = "price-up" if category["score"] > 0 else "price-down" if category["score"] < 0 else ""
+                score_text = f'{category["score"]:+d}' if category["score"] else "0"
+                score_html = f'<span class="{score_class}">{score_text}</span>'
+            items = "".join(f"<li>{html.escape(r)}</li>" for r in category["reasons"])
+            category_html += (
+                '<div class="opinion-cat">'
+                f'<div class="opinion-cat-head"><span>{category["name"]}</span>{score_html}</div>'
+                f"<ul>{items}</ul>"
+                "</div>"
+            )
+
+        st.markdown(
+            '<div class="hts-card">'
+            "<h4>🤖 AI 투자의견</h4>"
+            f'<span class="opinion-badge {opinion["css"]}">{opinion["label"]}</span>'
+            f'<span class="opinion-total">종합 {opinion["total"]:+d}점 (±{opinion["max_total"]}점 만점)</span>'
+            f"{category_html}"
+            f'<div class="opinion-cat" style="font-weight:700;">→ {html.escape(opinion["verdict"])}</div>'
+            '<div style="font-size:0.8rem; opacity:0.7; margin-top:8px;">'
+            "본 의견은 재무제표·공시·기술적 지표를 정해진 규칙으로 채점한 참고용이며 투자 조언이 아닙니다. "
+            "밸류에이션은 업종 평균과 비교하지 않고 절대 수준으로 판단합니다."
+            "</div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+        if dart_notice:
+            st.caption(f"ℹ️ {dart_notice}")
+
+    # ----------------------
+    # 재무 요약 + 주요 공시
+    # ----------------------
+    st.divider()
+    st.subheader("📑 재무 요약")
+
+    eps, bps = price_info["EPS"], price_info["BPS"]
+    roe = eps / bps * 100 if eps and bps > 0 else None
+    margin = debt_ratio = None
+    if financials:
+        if financials["매출액"] and financials["영업이익"] is not None:
+            margin = financials["영업이익"] / financials["매출액"] * 100
+        if financials["부채총계"] is not None and financials["자본총계"]:
+            debt_ratio = financials["부채총계"] / financials["자본총계"] * 100
+
+    f1, f2, f3, f4, f5 = st.columns(5)
+    f1.metric("PER", format_ratio(price_info["PER"], "배"))
+    f2.metric("PBR", format_ratio(price_info["PBR"], "배", 2))
+    f3.metric("ROE", format_ratio(roe, "%"))
+    f4.metric("영업이익률", format_ratio(margin, "%"))
+    f5.metric("부채비율", format_ratio(debt_ratio, "%", 0))
+
+    if financials:
+        st.caption(f"영업이익률·부채비율은 {financials['기준']} {financials['재무제표']}재무제표 기준입니다.")
+        if financials["연간추이"]:
+            # 금융업처럼 매출액 계정이 없으면 열 전체가 None이라 숫자형으로 맞춰 둔다.
+            trend = pd.DataFrame(financials["연간추이"]).set_index("연도").apply(pd.to_numeric)
+            revenue = trend["매출액"].where(trend["매출액"] > 0)
+            trend["영업이익률"] = (trend["영업이익"] / revenue * 100).map(
+                lambda v: f"{v:.1f}%" if pd.notna(v) else "-"
+            )
+            for col in ["매출액", "영업이익", "당기순이익"]:
+                trend[col] = trend[col].map(
+                    lambda v: investment_opinion.format_amount(v) if pd.notna(v) else "-"
+                )
+            st.dataframe(trend)
+
+    if disclosures is not None:
+        st.subheader(f"📢 최근 {DISCLOSURE_DAYS}일 주요 공시")
+        flagged = investment_opinion.classify_disclosures(disclosures)
+        if not flagged:
+            st.info("주가에 영향을 줄 만한 주요 공시가 없습니다.")
+        # 대형주는 수백 건이라 건별로 그리지 않고 한 번에 그린다.
+        st.markdown("\n".join(
+            f"- {'🔴' if d['점수'] > 0 else '🔵'} {d['접수일']} [{d['보고서명']}]({d['링크']}) — {d['분류']}"
+            for d in flagged
+        ))
+
+        with st.expander(f"전체 공시 {len(disclosures)}건 보기"):
+            st.markdown("\n".join(
+                f"- {d['접수일']} [{d['보고서명']}]({d['링크']})" for d in disclosures
+            ))
 
     # ----------------------
     # 뉴스 + 감성분석

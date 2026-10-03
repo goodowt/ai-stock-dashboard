@@ -201,7 +201,7 @@ def strip_market_suffix(ticker: str) -> str:
 
 
 def fetch_current_price(code: str) -> dict:
-    """주식현재가 시세 조회. 현재가/등락률/거래량/52주 최고·최저/시가총액 등을 반환."""
+    """주식현재가 시세 조회. 현재가/등락률/거래량/52주 최고·최저/시가총액/PER·PBR 등을 반환."""
 
     data = _request(
         "/uapi/domestic-stock/v1/quotations/inquire-price",
@@ -227,6 +227,10 @@ def fetch_current_price(code: str) -> dict:
         "시가총액": to_float("hts_avls"),
         "오늘저가": to_float("stck_lwpr"),
         "오늘고가": to_float("stck_hgpr"),
+        "PER": to_float("per"),
+        "PBR": to_float("pbr"),
+        "EPS": to_float("eps"),
+        "BPS": to_float("bps"),
     }
 
 
