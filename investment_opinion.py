@@ -67,6 +67,10 @@ def format_amount(value):
     return f"{sign}{value:,.0f}"
 
 
+def format_score(score):
+    return f"{score:+d}" if score else "0"
+
+
 def _growth_pct(current, previous):
     """전년 대비 증감률(%). 전년 값이 0 이하면 증감률이 의미가 없어 None."""
 
@@ -374,5 +378,5 @@ def generate_opinion(df, news_score, news_label, price_info, financials, disclos
         "total": total,
         "max_total": max_total,
         "categories": categories,
-        "verdict": f"{summary} 종합 {total:+d}점으로 {conclusion} 판단됩니다.",
+        "verdict": f"{summary} 종합 {format_score(total)}점으로 {conclusion} 판단됩니다.",
     }

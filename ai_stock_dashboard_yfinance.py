@@ -189,6 +189,11 @@ def load_fundamentals(code):
         dart_api.fetch_disclosures(corp_code, DISCLOSURE_DAYS),
     )
 
+@st.cache_resource
+def last_good_fundamentals():
+    # DART 연결이 끊겼을 때 대신 보여줄 종목별 마지막 성공 조회분: {code: (조회 시각, 재무, 공시)}
+    return {}
+
 def format_ratio(value, suffix, digits=1):
     return f"{value:,.{digits}f}{suffix}" if value else "-"
 
@@ -227,8 +232,16 @@ if refresh:
         try:
             financials, disclosures = load_fundamentals(code)
         except DARTAPIError as e:
-            dart_notice = f"DART 조회에 실패해 실적·공시 분석은 제외했습니다. ({e})"
+            stale = last_good_fundamentals().get(code)
+            if stale:
+                fetched_at, financials, disclosures = stale
+                dart_notice = (
+                    f"DART 조회에 실패해 {fetched_at:%m/%d %H:%M}에 조회한 실적·공시를 표시합니다. ({e})"
+                )
+            else:
+                dart_notice = f"DART 조회에 실패해 실적·공시 분석은 제외했습니다. ({e})"
         else:
+            last_good_fundamentals()[code] = (pd.Timestamp.now(tz="Asia/Seoul"), financials, disclosures)
             if financials is None and disclosures is None:
                 dart_notice = "DART에 등록된 기업이 아니어서(ETF 등) 실적·공시 분석은 제외했습니다."
 
@@ -307,7 +320,7 @@ if refresh:
                 score_html = '<span class="opinion-skip">평가 제외</span>'
             else:
                 score_class = "price-up" if category["score"] > 0 else "price-down" if category["score"] < 0 else ""
-                score_text = f'{category["score"]:+d}' if category["score"] else "0"
+                score_text = investment_opinion.format_score(category["score"])
                 score_html = f'<span class="{score_class}">{score_text}</span>'
             items = "".join(f"<li>{html.escape(r)}</li>" for r in category["reasons"])
             category_html += (
@@ -321,7 +334,7 @@ if refresh:
             '<div class="hts-card">'
             "<h4>🤖 AI 투자의견</h4>"
             f'<span class="opinion-badge {opinion["css"]}">{opinion["label"]}</span>'
-            f'<span class="opinion-total">종합 {opinion["total"]:+d}점 (±{opinion["max_total"]}점 만점)</span>'
+            f'<span class="opinion-total">종합 {investment_opinion.format_score(opinion["total"])}점 (±{opinion["max_total"]}점 만점)</span>'
             f"{category_html}"
             f'<div class="opinion-cat" style="font-weight:700;">→ {html.escape(opinion["verdict"])}</div>'
             '<div style="font-size:0.8rem; opacity:0.7; margin-top:8px;">'
@@ -351,7 +364,8 @@ if refresh:
             debt_ratio = financials["부채총계"] / financials["자본총계"] * 100
 
     f1, f2, f3, f4, f5 = st.columns(5)
-    f1.metric("PER", format_ratio(price_info["PER"], "배"))
+    # 순손실이면 KIS가 PER을 음수로 주는데, 의미 없는 값이라 표시하지 않는다.
+    f1.metric("PER", format_ratio(max(price_info["PER"], 0), "배"))
     f2.metric("PBR", format_ratio(price_info["PBR"], "배", 2))
     f3.metric("ROE", format_ratio(roe, "%"))
     f4.metric("영업이익률", format_ratio(margin, "%"))

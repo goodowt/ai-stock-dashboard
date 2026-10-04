@@ -79,7 +79,11 @@ def _require_key():
     return key
 
 
-MAX_NETWORK_RETRIES = 2
+MAX_NETWORK_RETRIES = 1
+
+# (연결, 응답) 제한 시간. 해외 서버(배포 환경)에서는 DART 연결이 아예 안 붙는 때가 있는데,
+# 그때 화면이 오래 멈추지 않도록 연결 쪽은 짧게 잡는다.
+REQUEST_TIMEOUT = (5, 15)
 
 
 def _get(path, params, _retry_count=0):
@@ -87,7 +91,7 @@ def _get(path, params, _retry_count=0):
         return requests.get(
             f"{BASE_URL}/{path}",
             params={"crtfc_key": _require_key(), **params},
-            timeout=15,
+            timeout=REQUEST_TIMEOUT,
         )
     except requests.exceptions.RequestException as e:
         if _retry_count < MAX_NETWORK_RETRIES:
