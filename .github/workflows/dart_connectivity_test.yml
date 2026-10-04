@@ -1,0 +1,52 @@
+name: DART connectivity test
+
+# 임시 진단용. 배포된 앱(해외 서버)에서 DART 연결이 ConnectTimeout으로 실패해서,
+# GitHub Actions(역시 해외 서버)에서는 DART에 연결되는지 확인한다.
+# 결과에 따라 DART 수집을 GitHub Actions에서 할지 국내 PC에서 할지 정한 뒤 이 파일은 지운다.
+
+on:
+  push:
+    paths:
+      - .github/workflows/dart_connectivity_test.yml
+  schedule:
+    # 시간대별로 막히는지 보려고 3시간마다 한 번
+    - cron: "17 */3 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        # 러너마다 IP가 달라서 같은 대상을 여러 러너에서 찔러 본다.
+        runner: [1, 2, 3]
+        target:
+          - name: opendart-api
+            # 키는 일부러 가짜 값. 연결만 되면 DART가 "등록되지 않은 키" 응답을 준다.
+            url: "https://opendart.fss.or.kr/api/list.json?crtfc_key=0000000000000000000000000000000000000000"
+          - name: dart-site
+            url: "https://dart.fss.or.kr/"
+          - name: kis-api
+            # 비교용: 지금도 잘 되고 있는 KIS 서버
+            url: "https://openapivts.koreainvestment.com:29443/"
+    name: ${{ matrix.target.name }} (runner ${{ matrix.runner }})
+    steps:
+      - name: Connect
+        run: |
+          curl -s https://api.ipify.org || true
+          echo
+          for attempt in 1 2 3; do
+            if curl -sS -o /dev/null --connect-timeout 10 --max-time 30 \
+                -w "attempt $attempt: http %{http_code}, connect %{time_connect}s, total %{time_total}s\n" \
+                "${{ matrix.target.url }}"; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "3번 모두 연결 실패"
+          exit 1
