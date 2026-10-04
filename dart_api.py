@@ -53,6 +53,10 @@ class DARTAPIError(Exception):
     pass
 
 
+class DARTResponseError(DARTAPIError):
+    """상태 코드는 200인데 본문이 JSON이 아닌 경우(DART가 오류 안내 페이지를 돌려줄 때)."""
+
+
 def _get_key():
     if st is not None:
         try:
@@ -114,7 +118,7 @@ def _request_page(path, params):
     try:
         data = res.json()
     except ValueError:
-        raise DARTAPIError("DART API 응답을 해석할 수 없습니다.")
+        raise DARTResponseError("DART API 응답을 해석할 수 없습니다.")
 
     status = data.get("status")
     if status == STATUS_NO_DATA:
@@ -154,13 +158,19 @@ def _load_corp_codes():
     return mapping
 
 
-def fetch_corp_code(stock_code: str):
-    """종목코드(6자리)에 해당하는 DART 고유번호(8자리). 없으면 None."""
+def corp_code_map():
+    """상장사 전체의 {종목코드: DART 고유번호}."""
 
     with _corp_code_store["lock"]:
         if _corp_code_store["map"] is None:
             _corp_code_store["map"] = _load_corp_codes()
-        return _corp_code_store["map"].get(stock_code)
+        return _corp_code_store["map"]
+
+
+def fetch_corp_code(stock_code: str):
+    """종목코드(6자리)에 해당하는 DART 고유번호(8자리). 없으면 None."""
+
+    return corp_code_map().get(stock_code)
 
 
 def _to_number(value):
@@ -209,7 +219,7 @@ def _stock_amount(rows, name_prefix):
     return _to_number(row.get("thstrm_amount")) if row else None
 
 
-def _candidate_reports(today: date):
+def candidate_reports(today: date):
     """기간이 이미 끝난 보고서를 최신순으로 나열한다(제출 여부는 조회해 봐야 안다)."""
 
     candidates = []
@@ -224,6 +234,9 @@ def _candidate_reports(today: date):
 
 MAX_REPORT_LOOKUPS = 5
 
+# 직전 연도 사업보고서가 아직 안 나온 연초를 감안해, 3개년 추이용 사업보고서는 2개 연도까지 찾아본다.
+MAX_ANNUAL_LOOKUPS = 2
+
 
 def _fetch_key_accounts(corp_code, year, reprt_code):
     return _request_json(
@@ -232,16 +245,54 @@ def _fetch_key_accounts(corp_code, year, reprt_code):
     )
 
 
-def _fetch_operating_cash_flow(corp_code, year, reprt_code, fs_div):
-    """현금흐름표의 영업활동현금흐름(누적). 못 구하면 None — 부가 지표라 실패해도 넘어간다."""
+MULTI_ACCOUNT_BATCH = 100
 
+
+def fetch_key_accounts_multi(corp_codes, year, reprt_code):
+    """여러 회사의 주요 계정을 한꺼번에 받아 {고유번호: 행 목록}으로 묶는다.
+
+    전 종목을 도는 수집 스크립트(scripts/build_dart_data.py)용. 호출 한 번에 100개사까지 된다.
+    해당 보고서를 내지 않은 회사는 결과에 없다.
+    """
+
+    grouped = {}
+    for i in range(0, len(corp_codes), MULTI_ACCOUNT_BATCH):
+        for row in _fetch_key_accounts_batch(corp_codes[i:i + MULTI_ACCOUNT_BATCH], year, reprt_code):
+            grouped.setdefault(row["corp_code"], []).append(row)
+    return grouped
+
+
+def _fetch_key_accounts_batch(corp_codes, year, reprt_code):
+    # 특정 회사 조합에서는 DART가 JSON 대신 오류 안내 페이지를 돌려준다(같은 묶음을 반으로
+    # 나누면 정상). 그럴 때는 묶음을 쪼개 다시 받는다.
     try:
-        rows = _request_json(
-            "fnlttSinglAcntAll.json",
-            {"corp_code": corp_code, "bsns_year": year, "reprt_code": reprt_code, "fs_div": fs_div},
+        return _request_json(
+            "fnlttMultiAcnt.json",
+            {"corp_code": ",".join(corp_codes), "bsns_year": year, "reprt_code": reprt_code},
         )
-    except DARTAPIError:
-        return None
+    except DARTResponseError:
+        if len(corp_codes) == 1:
+            raise
+        half = len(corp_codes) // 2
+        return (
+            _fetch_key_accounts_batch(corp_codes[:half], year, reprt_code)
+            + _fetch_key_accounts_batch(corp_codes[half:], year, reprt_code)
+        )
+
+
+def statement_division(all_rows):
+    """주요 계정 응답에서 실제로 쓸 재무제표 구분(CFS 연결 / OFS 개별)."""
+
+    return _pick_statement_rows(all_rows)[1]
+
+
+def fetch_operating_cash_flow(corp_code, year, reprt_code, fs_div):
+    """현금흐름표의 영업활동현금흐름(누적). 현금흐름표에 해당 계정이 없으면 None."""
+
+    rows = _request_json(
+        "fnlttSinglAcntAll.json",
+        {"corp_code": corp_code, "bsns_year": year, "reprt_code": reprt_code, "fs_div": fs_div},
+    )
 
     for row in rows:
         if row.get("account_id") == "ifrs-full_CashFlowsFromUsedInOperatingActivities":
@@ -271,45 +322,19 @@ def _annual_trend(rows, year):
     return trend
 
 
-def fetch_financials(corp_code: str, today: date = None):
-    """가장 최근에 제출된 정기보고서 기준 주요 재무 수치. 제출된 보고서가 없으면 None."""
+def build_financials(year, reprt_code, all_rows, annual_year, annual_all_rows, cash_flow):
+    """한 회사의 주요 계정 응답(연결·개별이 섞인 원본 행)을 대시보드용 수치로 정리한다.
 
-    today = today or datetime.now().date()
-    candidates = _candidate_reports(today)
+    annual_all_rows는 3개년 추이를 만들 사업보고서 응답(없으면 빈 목록),
+    cash_flow는 fetch_operating_cash_flow()로 따로 구한 값이다.
+    """
 
-    latest = None
-    for year, reprt_code in candidates[:MAX_REPORT_LOOKUPS]:
-        rows = _fetch_key_accounts(corp_code, year, reprt_code)
-        if rows:
-            latest = (year, reprt_code, rows)
-            break
-    if latest is None:
-        return None
-
-    year, reprt_code, all_rows = latest
     rows, fs_div = _pick_statement_rows(all_rows)
+    annual_rows, _ = _pick_statement_rows(annual_all_rows)
 
     revenue, revenue_prev = _flow_amounts(_find_account(rows, "매출액"))
     operating_income, operating_income_prev = _flow_amounts(_find_account(rows, "영업이익"))
     net_income, net_income_prev = _flow_amounts(_find_account(rows, "당기순이익"))
-
-    # 최근 3개년 추이는 사업보고서에서만 나온다. 최신 보고서가 분·반기면 직전 사업보고서를 따로 받는다.
-    # 연초에는 직전 연도 사업보고서가 아직 안 나왔을 수 있어 그 전 해까지 본다.
-    if reprt_code == REPORT_ANNUAL:
-        annual_year, annual_rows = year, rows
-    else:
-        annual_year, annual_rows = None, []
-        annual_years = [y for y, code in candidates if code == REPORT_ANNUAL]
-        for candidate_year in annual_years[:2]:
-            try:
-                found, _ = _pick_statement_rows(
-                    _fetch_key_accounts(corp_code, candidate_year, REPORT_ANNUAL)
-                )
-            except DARTAPIError:
-                break
-            if found:
-                annual_year, annual_rows = candidate_year, found
-                break
 
     return {
         "기준": f"{year}년 {REPORT_LABELS[reprt_code]}",
@@ -325,9 +350,50 @@ def fetch_financials(corp_code: str, today: date = None):
         "자본총계": _stock_amount(rows, "자본총계"),
         # 은행·보험·증권 등은 유동/비유동을 구분하지 않는다. 부채비율 해석을 건너뛰는 데 쓴다.
         "유동성구분": _find_account(rows, "유동자산") is not None,
-        "영업활동현금흐름": _fetch_operating_cash_flow(corp_code, year, reprt_code, fs_div),
+        "영업활동현금흐름": cash_flow,
         "연간추이": _annual_trend(annual_rows, annual_year) if annual_rows else [],
     }
+
+
+def fetch_financials(corp_code: str, today: date = None):
+    """가장 최근에 제출된 정기보고서 기준 주요 재무 수치. 제출된 보고서가 없으면 None."""
+
+    today = today or datetime.now().date()
+    candidates = candidate_reports(today)
+
+    latest = None
+    for year, reprt_code in candidates[:MAX_REPORT_LOOKUPS]:
+        rows = _fetch_key_accounts(corp_code, year, reprt_code)
+        if rows:
+            latest = (year, reprt_code, rows)
+            break
+    if latest is None:
+        return None
+
+    year, reprt_code, all_rows = latest
+
+    # 최근 3개년 추이는 사업보고서에서만 나온다. 최신 보고서가 분·반기면 직전 사업보고서를 따로 받는다.
+    if reprt_code == REPORT_ANNUAL:
+        annual_year, annual_all_rows = year, all_rows
+    else:
+        annual_year, annual_all_rows = None, []
+        annual_years = [y for y, code in candidates if code == REPORT_ANNUAL]
+        for candidate_year in annual_years[:MAX_ANNUAL_LOOKUPS]:
+            try:
+                found = _fetch_key_accounts(corp_code, candidate_year, REPORT_ANNUAL)
+            except DARTAPIError:
+                break
+            if found:
+                annual_year, annual_all_rows = candidate_year, found
+                break
+
+    # 부가 지표라 실패해도 나머지 수치는 보여준다.
+    try:
+        cash_flow = fetch_operating_cash_flow(corp_code, year, reprt_code, statement_division(all_rows))
+    except DARTAPIError:
+        cash_flow = None
+
+    return build_financials(year, reprt_code, all_rows, annual_year, annual_all_rows, cash_flow)
 
 
 MAX_DISCLOSURE_PAGES = 10
@@ -353,11 +419,39 @@ def fetch_disclosures(corp_code: str, days: int = 90, today: date = None):
             break
         page_no += 1
 
-    return [
-        {
-            "보고서명": (row.get("report_nm") or "").strip(),
-            "접수일": row.get("rcept_dt", ""),
-            "링크": DISCLOSURE_URL.format(rcept_no=row.get("rcept_no", "")),
-        }
-        for row in rows
-    ]
+    return [_disclosure_item(row) for row in rows]
+
+
+def _disclosure_item(row):
+    return {
+        "보고서명": (row.get("report_nm") or "").strip(),
+        "접수일": row.get("rcept_dt", ""),
+        "링크": DISCLOSURE_URL.format(rcept_no=row.get("rcept_no", "")),
+    }
+
+
+def fetch_market_disclosures(corp_cls: str, days: int = 90, today: date = None):
+    """시장 전체(corp_cls Y: 유가증권, K: 코스닥)의 최근 공시를 {종목코드: 공시 목록}으로 묶는다.
+
+    전 종목을 도는 수집 스크립트용. 회사를 지정하지 않는 조회는 기간이 3개월까지만 허용된다.
+    """
+
+    today = today or datetime.now().date()
+    params = {
+        "corp_cls": corp_cls,
+        "bgn_de": (today - timedelta(days=days)).strftime("%Y%m%d"),
+        "end_de": today.strftime("%Y%m%d"),
+        "page_count": 100,
+    }
+
+    grouped, page_no = {}, 1
+    while True:
+        rows, total_page = _request_page("list.json", {**params, "page_no": page_no})
+        for row in rows:
+            stock_code = (row.get("stock_code") or "").strip()
+            if stock_code:
+                grouped.setdefault(stock_code, []).append(_disclosure_item(row))
+        if page_no >= total_page:
+            break
+        page_no += 1
+    return grouped

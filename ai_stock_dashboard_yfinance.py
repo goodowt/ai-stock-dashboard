@@ -1,6 +1,8 @@
 # ai_stock_dashboard_yfinance.py
 
 import html
+import json
+import os
 
 import streamlit as st
 import pandas as pd
@@ -194,6 +196,59 @@ def last_good_fundamentals():
     # DART 연결이 끊겼을 때 대신 보여줄 종목별 마지막 성공 조회분: {code: (조회 시각, 재무, 공시)}
     return {}
 
+# 배포 서버(해외)에서는 DART 연결이 자주 막혀서, GitHub Actions가 미리 받아 둔
+# 수집 파일(scripts/build_dart_data.py)을 먼저 쓴다. 파일이 바뀌면(mtime) 다시 읽는다.
+DART_DATA_PATH = os.path.join("scripts", "dart_data.json")
+
+@st.cache_resource(show_spinner=False, max_entries=1)
+def read_dart_data(mtime):
+    with open(DART_DATA_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+def load_dart_data():
+    try:
+        return read_dart_data(os.path.getmtime(DART_DATA_PATH))
+    except (OSError, ValueError):
+        return None
+
+def get_fundamentals(code):
+    """(재무, 공시 목록, 전체 공시 건수, 안내 문구). 재무·공시가 None이면 평가에서 빠진다.
+
+    수집 파일에서 온 공시 목록에는 의견에 반영되는 주요 공시만 들어 있다.
+    """
+
+    collected = load_dart_data()
+    if collected and code in collected["stocks"]:
+        record = collected["stocks"][code]
+        if record is None:
+            return None, None, 0, "DART에 등록된 기업이 아니어서(ETF 등) 실적·공시 분석은 제외했습니다."
+        return (
+            record["financials"],
+            record["disclosures"],
+            record["disclosure_count"],
+            f"실적·공시는 {collected['updated']}에 수집한 데이터입니다.",
+        )
+
+    # 수집 파일에 없는 종목(수집 이후 신규 상장 등)은 DART를 직접 조회한다.
+    if not dart_api.has_key():
+        return None, None, 0, "DART_API_KEY가 설정되지 않아 실적·공시 분석은 제외했습니다."
+
+    notice = None
+    try:
+        financials, disclosures = load_fundamentals(code)
+    except DARTAPIError as e:
+        stale = last_good_fundamentals().get(code)
+        if not stale:
+            return None, None, 0, f"DART 조회에 실패해 실적·공시 분석은 제외했습니다. ({e})"
+        fetched_at, financials, disclosures = stale
+        notice = f"DART 조회에 실패해 {fetched_at:%m/%d %H:%M}에 조회한 실적·공시를 표시합니다. ({e})"
+    else:
+        last_good_fundamentals()[code] = (pd.Timestamp.now(tz="Asia/Seoul"), financials, disclosures)
+        if financials is None and disclosures is None:
+            notice = "DART에 등록된 기업이 아니어서(ETF 등) 실적·공시 분석은 제외했습니다."
+
+    return financials, disclosures, len(disclosures or []), notice
+
 def format_ratio(value, suffix, digits=1):
     return f"{value:,.{digits}f}{suffix}" if value else "-"
 
@@ -225,25 +280,7 @@ if refresh:
     news_list = get_news(selected_name)
     news_label, news_score = analyze_news(news_list)
 
-    financials, disclosures, dart_notice = None, None, None
-    if not dart_api.has_key():
-        dart_notice = "DART_API_KEY가 설정되지 않아 실적·공시 분석은 제외했습니다."
-    else:
-        try:
-            financials, disclosures = load_fundamentals(code)
-        except DARTAPIError as e:
-            stale = last_good_fundamentals().get(code)
-            if stale:
-                fetched_at, financials, disclosures = stale
-                dart_notice = (
-                    f"DART 조회에 실패해 {fetched_at:%m/%d %H:%M}에 조회한 실적·공시를 표시합니다. ({e})"
-                )
-            else:
-                dart_notice = f"DART 조회에 실패해 실적·공시 분석은 제외했습니다. ({e})"
-        else:
-            last_good_fundamentals()[code] = (pd.Timestamp.now(tz="Asia/Seoul"), financials, disclosures)
-            if financials is None and disclosures is None:
-                dart_notice = "DART에 등록된 기업이 아니어서(ETF 등) 실적·공시 분석은 제외했습니다."
+    financials, disclosures, disclosure_count, dart_notice = get_fundamentals(code)
 
     # ----------------------
     # 상단 요약 스트립
@@ -311,7 +348,7 @@ if refresh:
 
     with col_side:
         opinion = investment_opinion.generate_opinion(
-            df, news_score, news_label, price_info, financials, disclosures, DISCLOSURE_DAYS
+            df, news_score, news_label, price_info, financials, disclosures, DISCLOSURE_DAYS, disclosure_count
         )
 
         category_html = ""
@@ -397,10 +434,13 @@ if refresh:
             for d in flagged
         ))
 
-        with st.expander(f"전체 공시 {len(disclosures)}건 보기"):
-            st.markdown("\n".join(
-                f"- {d['접수일']} [{d['보고서명']}]({d['링크']})" for d in disclosures
-            ))
+        if len(disclosures) == disclosure_count:
+            with st.expander(f"전체 공시 {disclosure_count}건 보기"):
+                st.markdown("\n".join(
+                    f"- {d['접수일']} [{d['보고서명']}]({d['링크']})" for d in disclosures
+                ))
+        else:
+            st.caption(f"전체 공시 {disclosure_count}건 중 의견에 반영되는 주요 공시만 표시합니다.")
 
     # ----------------------
     # 뉴스 + 감성분석

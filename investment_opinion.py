@@ -254,10 +254,14 @@ def classify_disclosures(disclosures):
     return flagged
 
 
-def evaluate_disclosures(disclosures, days):
+def evaluate_disclosures(disclosures, days, total_count=None):
+    """total_count: 주요 공시만 추려 넘길 때(수집 파일)의 원래 전체 공시 건수."""
+
     name = "공시"
     if disclosures is None:
         return _unavailable(name, "공시 목록을 가져오지 못해 평가하지 않았습니다.")
+    if total_count is None:
+        total_count = len(disclosures)
 
     # 정정 공시 등으로 같은 종류가 여러 건 올라와도 한 번만 반영한다.
     by_label = {}
@@ -267,7 +271,7 @@ def evaluate_disclosures(disclosures, days):
 
     if not by_label:
         return _category(
-            name, 0, [f"최근 {days}일간 주가에 영향을 줄 만한 주요 공시가 없습니다(전체 {len(disclosures)}건)."]
+            name, 0, [f"최근 {days}일간 주가에 영향을 줄 만한 주요 공시가 없습니다(전체 {total_count}건)."]
         )
 
     score = 0
@@ -335,7 +339,9 @@ def evaluate_technical(df, news_score, news_label):
     return _category(name, score, reasons)
 
 
-def generate_opinion(df, news_score, news_label, price_info, financials, disclosures, disclosure_days):
+def generate_opinion(
+    df, news_score, news_label, price_info, financials, disclosures, disclosure_days, disclosure_count=None
+):
     """항목별 평가와 종합 의견을 만든다.
 
     financials / disclosures가 None이면(DART 키 없음, 조회 실패 등) 해당 항목은
@@ -346,7 +352,7 @@ def generate_opinion(df, news_score, news_label, price_info, financials, disclos
         evaluate_growth(financials),
         evaluate_health(financials, price_info),
         evaluate_valuation(price_info),
-        evaluate_disclosures(disclosures, disclosure_days),
+        evaluate_disclosures(disclosures, disclosure_days, disclosure_count),
         evaluate_technical(df, news_score, news_label),
     ]
 
