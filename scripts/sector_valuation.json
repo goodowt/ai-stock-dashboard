@@ -1,0 +1,179 @@
+{
+  "generated_at": "2026-10-06T01:28:56.331989+09:00",
+  "sectors": {
+    "IT 서비스": {
+      "per": 13.23,
+      "per_count": 138,
+      "pbr": 1.02,
+      "pbr_count": 236
+    },
+    "건설": {
+      "per": 7.66,
+      "per_count": 40,
+      "pbr": 0.59,
+      "pbr_count": 51
+    },
+    "금속": {
+      "per": 14.81,
+      "per_count": 69,
+      "pbr": 0.49,
+      "pbr_count": 120
+    },
+    "금융": {
+      "per": 12.46,
+      "per_count": 112,
+      "pbr": 0.92,
+      "pbr_count": 143
+    },
+    "기계·장비": {
+      "per": 19.47,
+      "per_count": 118,
+      "pbr": 1.31,
+      "pbr_count": 205
+    },
+    "기타제조": {
+      "per": 6.98,
+      "per_count": 4,
+      "pbr": 0.72,
+      "pbr_count": 12
+    },
+    "리츠": {
+      "per": 30.42,
+      "per_count": 11,
+      "pbr": 0.68,
+      "pbr_count": 17
+    },
+    "보험": {
+      "per": 7.96,
+      "per_count": 10,
+      "pbr": 0.7,
+      "pbr_count": 10
+    },
+    "부동산": {
+      "per": 11.32,
+      "per_count": 2,
+      "pbr": 0.85,
+      "pbr_count": 3
+    },
+    "비금속": {
+      "per": 16.41,
+      "per_count": 18,
+      "pbr": 0.45,
+      "pbr_count": 34
+    },
+    "섬유·의류": {
+      "per": 7.42,
+      "per_count": 28,
+      "pbr": 0.4,
+      "pbr_count": 47
+    },
+    "오락·문화": {
+      "per": 11.25,
+      "per_count": 31,
+      "pbr": 0.63,
+      "pbr_count": 64
+    },
+    "외국증권": {
+      "per": 20.86,
+      "per_count": 10,
+      "pbr": 0.36,
+      "pbr_count": 12
+    },
+    "운송·창고": {
+      "per": 7.1,
+      "per_count": 20,
+      "pbr": 0.56,
+      "pbr_count": 28
+    },
+    "운송장비·부품": {
+      "per": 7.79,
+      "per_count": 94,
+      "pbr": 0.53,
+      "pbr_count": 128
+    },
+    "유통": {
+      "per": 12.34,
+      "per_count": 93,
+      "pbr": 0.56,
+      "pbr_count": 152
+    },
+    "음식료·담배": {
+      "per": 9.64,
+      "per_count": 57,
+      "pbr": 0.52,
+      "pbr_count": 84
+    },
+    "의료·정밀기기": {
+      "per": 22.99,
+      "per_count": 57,
+      "pbr": 1.23,
+      "pbr_count": 100
+    },
+    "인프라투용": {
+      "per": null,
+      "per_count": 0,
+      "pbr": null,
+      "pbr_count": 0
+    },
+    "일반서비스": {
+      "per": 12.29,
+      "per_count": 85,
+      "pbr": 1.2,
+      "pbr_count": 159
+    },
+    "전기·가스": {
+      "per": 4.63,
+      "per_count": 9,
+      "pbr": 0.34,
+      "pbr_count": 10
+    },
+    "전기·전자": {
+      "per": 18.92,
+      "per_count": 207,
+      "pbr": 1.34,
+      "pbr_count": 358
+    },
+    "제약": {
+      "per": 15.9,
+      "per_count": 85,
+      "pbr": 1.1,
+      "pbr_count": 159
+    },
+    "제조": {
+      "per": 7.76,
+      "per_count": 3,
+      "pbr": 0.38,
+      "pbr_count": 8
+    },
+    "종이·목재": {
+      "per": 15.17,
+      "per_count": 11,
+      "pbr": 0.32,
+      "pbr_count": 27
+    },
+    "증권": {
+      "per": 9.3,
+      "per_count": 17,
+      "pbr": 0.49,
+      "pbr_count": 17
+    },
+    "출판·매체복제": {
+      "per": 9.2,
+      "per_count": 1,
+      "pbr": 0.57,
+      "pbr_count": 2
+    },
+    "통신": {
+      "per": 12.06,
+      "per_count": 11,
+      "pbr": 0.83,
+      "pbr_count": 13
+    },
+    "화학": {
+      "per": 13.68,
+      "per_count": 152,
+      "pbr": 0.7,
+      "pbr_count": 212
+    }
+  }
+}

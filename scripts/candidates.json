@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-02T23:32:44.616360+09:00",
+  "generated_at": "2026-10-06T01:33:32.319849+09:00",
   "market_cap_threshold": 1200000000000,
   "candidates": [
     {
@@ -1165,6 +1165,13 @@
       "env_lower": 91796.0
     },
     {
+      "name": "LG디스플레이",
+      "code": "034220",
+      "market": "KOSPI",
+      "ma20": 8680.0,
+      "env_lower": 6944.0
+    },
+    {
       "name": "기업은행",
       "code": "024110",
       "market": "KOSPI",
@@ -1240,13 +1247,6 @@
       "market": "KOSDAQ",
       "ma20": 32287.5,
       "env_lower": 25830.0
-    },
-    {
-      "name": "리노공업",
-      "code": "058470",
-      "market": "KOSDAQ",
-      "ma20": 70450.0,
-      "env_lower": 56360.0
     },
     {
       "name": "성호전자",
@@ -1338,6 +1338,13 @@
       "market": "KOSDAQ",
       "ma20": 470825.0,
       "env_lower": 376660.0
+    },
+    {
+      "name": "우리기술",
+      "code": "032820",
+      "market": "KOSDAQ",
+      "ma20": 12816.5,
+      "env_lower": 10253.2
     },
     {
       "name": "에스엠",
@@ -1697,6 +1704,13 @@
       "env_lower": 123812.0
     },
     {
+      "name": "한화에어로스페이스",
+      "code": "012450",
+      "market": "KOSPI",
+      "ma20": 1054700.0,
+      "env_lower": 843760.0
+    },
+    {
       "name": "현대제철",
       "code": "004020",
       "market": "KOSPI",
@@ -1765,6 +1779,20 @@
       "market": "KOSPI",
       "ma20": 6304.5,
       "env_lower": 5043.6
+    },
+    {
+      "name": "농심",
+      "code": "004370",
+      "market": "KOSPI",
+      "ma20": 406775.0,
+      "env_lower": 325420.0
+    },
+    {
+      "name": "삼화콘덴서공업",
+      "code": "001820",
+      "market": "KOSPI",
+      "ma20": 136445.0,
+      "env_lower": 109156.0
     },
     {
       "name": "한화",
@@ -1849,6 +1877,13 @@
       "market": "KOSPI",
       "ma20": 30325.0,
       "env_lower": 24260.0
+    },
+    {
+      "name": "롯데지주",
+      "code": "004990",
+      "market": "KOSPI",
+      "ma20": 24610.0,
+      "env_lower": 19688.0
     },
     {
       "name": "기아",
