@@ -13,6 +13,7 @@ import feedparser
 import dart_api
 import investment_opinion
 import kis_api
+import score_validation
 from dart_api import DARTAPIError
 from kis_api import KISAPIError
 
@@ -199,17 +200,22 @@ def last_good_fundamentals():
 # 배포 서버(해외)에서는 DART 연결이 자주 막혀서, GitHub Actions가 미리 받아 둔
 # 수집 파일(scripts/build_dart_data.py)을 먼저 쓴다. 파일이 바뀌면(mtime) 다시 읽는다.
 DART_DATA_PATH = os.path.join("scripts", "dart_data.json")
+# 업종별 PER·PBR 중앙값(scripts/build_candidates.py가 매일 갱신)
+SECTOR_PATH = os.path.join("scripts", "sector_valuation.json")
 
-@st.cache_resource(show_spinner=False, max_entries=1)
-def read_dart_data(mtime):
-    with open(DART_DATA_PATH, encoding="utf-8") as f:
+@st.cache_resource(show_spinner=False, max_entries=4)
+def read_json(path, mtime):
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
-def load_dart_data():
+def load_json(path):
     try:
-        return read_dart_data(os.path.getmtime(DART_DATA_PATH))
+        return read_json(path, os.path.getmtime(path))
     except (OSError, ValueError):
         return None
+
+def load_dart_data():
+    return load_json(DART_DATA_PATH)
 
 def get_fundamentals(code):
     """(재무, 공시 목록, 전체 공시 건수, 안내 문구). 재무·공시가 None이면 평가에서 빠진다.
@@ -249,8 +255,32 @@ def get_fundamentals(code):
 
     return financials, disclosures, len(disclosures or []), notice
 
+# 목표주가 변경 방향을 보려면 같은 증권사의 직전 리포트가 필요해서 평가 기간(90일)보다 길게 받는다.
+OPINION_DAYS = 180
+
+def get_market_signals(code):
+    """(투자자별 순매수, 증권사 투자의견). 조회에 실패한 쪽은 None이라 그 항목만 평가에서 빠진다."""
+
+    try:
+        investor = kis_api.fetch_investor_trend(code)
+    except KISAPIError:
+        investor = None
+
+    today = pd.Timestamp.now(tz="Asia/Seoul").tz_localize(None)
+    try:
+        opinions = kis_api.fetch_invest_opinions(code, today - pd.Timedelta(days=OPINION_DAYS), today)
+    except KISAPIError:
+        opinions = None
+
+    return investor, opinions
+
 def format_ratio(value, suffix, digits=1):
     return f"{value:,.{digits}f}{suffix}" if value else "-"
+
+def format_growth(current, previous):
+    if pd.isna(current) or pd.isna(previous) or previous <= 0:
+        return "-"
+    return f"{(current - previous) / previous * 100:+.1f}%"
 
 # ----------------------
 # 실행
@@ -268,12 +298,8 @@ if refresh:
         st.error("데이터 없음")
         st.stop()
 
-    ma_list = [5, 7, 10, 15, 20]
-    for ma in ma_list:
-        df[f"MA{ma}"] = df["Close"].rolling(ma).mean()
-
-    df["ENV_UPPER"] = df["MA20"] * 1.2
-    df["ENV_LOWER"] = df["MA20"] * 0.8
+    ma_list = investment_opinion.MA_WINDOWS
+    investment_opinion.add_indicators(df)
     df["Value"] = ((df["Open"] + df["High"] + df["Low"] + df["Close"]) / 4) * df["Volume"]
     df["Value_억"] = df["Value"] / 1_0000_0000
 
@@ -281,6 +307,8 @@ if refresh:
     news_label, news_score = analyze_news(news_list)
 
     financials, disclosures, disclosure_count, dart_notice = get_fundamentals(code)
+    investor, opinions = get_market_signals(code)
+    sector_stats = (load_json(SECTOR_PATH) or {}).get("sectors")
 
     # ----------------------
     # 상단 요약 스트립
@@ -348,7 +376,11 @@ if refresh:
 
     with col_side:
         opinion = investment_opinion.generate_opinion(
-            df, news_score, news_label, price_info, financials, disclosures, DISCLOSURE_DAYS, disclosure_count
+            df, price_info,
+            news_score=news_score, news_label=news_label,
+            financials=financials, disclosures=disclosures,
+            disclosure_days=DISCLOSURE_DAYS, disclosure_count=disclosure_count,
+            investor=investor, opinions=opinions, sector_stats=sector_stats,
         )
 
         category_html = ""
@@ -375,8 +407,8 @@ if refresh:
             f"{category_html}"
             f'<div class="opinion-cat" style="font-weight:700;">→ {html.escape(opinion["verdict"])}</div>'
             '<div style="font-size:0.8rem; opacity:0.7; margin-top:8px;">'
-            "본 의견은 재무제표·공시·기술적 지표를 정해진 규칙으로 채점한 참고용이며 투자 조언이 아닙니다. "
-            "밸류에이션은 업종 평균과 비교하지 않고 절대 수준으로 판단합니다."
+            "본 의견은 재무제표·공시·수급·증권사 의견·기술적 지표를 정해진 규칙으로 채점한 참고용이며 "
+            "투자 조언이 아닙니다. 채점 기준은 아직 수익률로 검증되지 않았습니다."
             "</div>"
             "</div>",
             unsafe_allow_html=True,
@@ -391,8 +423,7 @@ if refresh:
     st.divider()
     st.subheader("📑 재무 요약")
 
-    eps, bps = price_info["EPS"], price_info["BPS"]
-    roe = eps / bps * 100 if eps and bps > 0 else None
+    metrics = opinion["metrics"]
     margin = debt_ratio = None
     if financials:
         if financials["매출액"] and financials["영업이익"] is not None:
@@ -401,15 +432,19 @@ if refresh:
             debt_ratio = financials["부채총계"] / financials["자본총계"] * 100
 
     f1, f2, f3, f4, f5 = st.columns(5)
-    # 순손실이면 KIS가 PER을 음수로 주는데, 의미 없는 값이라 표시하지 않는다.
-    f1.metric("PER", format_ratio(max(price_info["PER"], 0), "배"))
-    f2.metric("PBR", format_ratio(price_info["PBR"], "배", 2))
-    f3.metric("ROE", format_ratio(roe, "%"))
+    f1.metric("PER", format_ratio(metrics["PER"], "배"))
+    f2.metric("PBR", format_ratio(metrics["PBR"], "배", 2))
+    f3.metric("ROE", format_ratio(metrics["ROE"], "%"))
     f4.metric("영업이익률", format_ratio(margin, "%"))
     f5.metric("부채비율", format_ratio(debt_ratio, "%", 0))
 
+    if metrics["출처"] == "DART":
+        st.caption("PER·PBR·ROE는 KIS에 수치가 없는 종목이라 DART 재무제표와 시가총액으로 계산한 값입니다.")
+
     if financials:
         st.caption(f"영업이익률·부채비율은 {financials['기준']} {financials['재무제표']}재무제표 기준입니다.")
+        col_annual, col_quarter = st.columns(2)
+
         if financials["연간추이"]:
             # 금융업처럼 매출액 계정이 없으면 열 전체가 None이라 숫자형으로 맞춰 둔다.
             trend = pd.DataFrame(financials["연간추이"]).set_index("연도").apply(pd.to_numeric)
@@ -421,7 +456,38 @@ if refresh:
                 trend[col] = trend[col].map(
                     lambda v: investment_opinion.format_amount(v) if pd.notna(v) else "-"
                 )
-            st.dataframe(trend)
+            col_annual.markdown("**연간 실적**")
+            col_annual.dataframe(trend)
+
+        # 수집 파일이 예전 형식이면 분기 추이가 없을 수 있다.
+        if financials.get("분기추이"):
+            quarters = pd.DataFrame(financials["분기추이"]).set_index("분기").apply(pd.to_numeric)
+            revenue = quarters["매출액"].where(quarters["매출액"] > 0)
+            table = pd.DataFrame({
+                "매출액": quarters["매출액"].map(
+                    lambda v: investment_opinion.format_amount(v) if pd.notna(v) else "-"
+                ),
+                "전년 대비": [
+                    format_growth(c, p) for c, p in zip(quarters["매출액"], quarters["매출액_전년"])
+                ],
+                "영업이익": quarters["영업이익"].map(
+                    lambda v: investment_opinion.format_amount(v) if pd.notna(v) else "-"
+                ),
+                "영업이익률": (quarters["영업이익"] / revenue * 100).map(
+                    lambda v: f"{v:.1f}%" if pd.notna(v) else "-"
+                ),
+            }, index=quarters.index)
+            col_quarter.markdown("**분기 실적 (3개월 단위)**")
+            col_quarter.dataframe(table)
+
+    recent_opinions = investment_opinion.latest_opinions(
+        opinions or [], pd.Timestamp.now(tz="Asia/Seoul").tz_localize(None)
+    )
+    if recent_opinions:
+        st.subheader(f"🏦 증권사 목표주가 (최근 {investment_opinion.CONSENSUS_DAYS}일)")
+        opinion_table = pd.DataFrame(recent_opinions)[["날짜", "증권사", "의견", "목표가"]]
+        opinion_table["목표가"] = opinion_table["목표가"].map(lambda v: f"{v:,.0f}원" if v else "-")
+        st.dataframe(opinion_table.set_index("날짜"))
 
     if disclosures is not None:
         st.subheader(f"📢 최근 {DISCLOSURE_DAYS}일 주요 공시")
@@ -451,6 +517,37 @@ if refresh:
 
     for n in news_list:
         st.markdown(f"- [{n['title']}]({n['link']})")
+
+    # ----------------------
+    # 점수 검증
+    # ----------------------
+    st.divider()
+    st.subheader("📈 점수 검증")
+    history = score_validation.load_history()
+    recorded_days = history["date"].nunique()
+    if history.empty:
+        st.caption("아직 점수 기록이 없습니다. 장마감 후 대형주 후보의 점수가 매일 한 번씩 기록됩니다.")
+    else:
+        st.caption(
+            f"대형주 후보 등 {history['code'].nunique()}개 종목의 점수를 {recorded_days}거래일치 "
+            f"({history['date'].min()} ~ {history['date'].max()}) 기록했습니다. "
+            "점수를 매긴 뒤 실제 수익률이 어땠는지를 보여 줍니다(뉴스 감성은 기록에서 제외)."
+        )
+        for horizon in score_validation.HORIZONS:
+            by_verdict = score_validation.summarize_by_verdict(history, horizon)
+            if by_verdict is None:
+                st.caption(f"{horizon}거래일 뒤 수익률은 기록이 {horizon + 1}거래일 이상 쌓이면 표시됩니다.")
+                continue
+            st.markdown(f"**{horizon}거래일 뒤 수익률**")
+            col_verdict, col_category = st.columns(2)
+            col_verdict.dataframe(by_verdict)
+            by_category = score_validation.summarize_by_category(history, horizon)
+            if by_category is not None:
+                col_category.dataframe(by_category)
+        st.caption(
+            f"표본 수가 {score_validation.MIN_SAMPLES}건보다 적은 구간은 우연일 수 있습니다. "
+            "상관계수는 항목 점수와 이후 수익률의 순위 상관으로, 0에 가까우면 그 항목이 수익률을 설명하지 못했다는 뜻입니다."
+        )
 
 else:
     st.info("왼쪽 사이드바에서 종목과 조건을 선택한 뒤 '새로고침' 버튼을 눌러주세요.")

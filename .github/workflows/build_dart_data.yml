@@ -19,9 +19,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 평소에는 몇 분이면 끝나지만, 분기 실적 시즌에는 보고서가 바뀐 종목의 현금흐름을
-    # 종목별로 다시 받느라 수십 분 걸릴 수 있다.
-    timeout-minutes: 120
+    # 국내에서는 10분 안팎이지만 GitHub 러너(해외)에서는 DART 응답이 느려 1시간 넘게 걸린다.
+    # 분기 실적 시즌에는 보고서가 바뀐 종목의 현금흐름을 종목별로 다시 받느라 더 길어진다.
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
 

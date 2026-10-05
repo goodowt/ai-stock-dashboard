@@ -44,41 +44,40 @@ def load_previous():
 
 
 def collect_reports(corp_codes, today):
-    """회사별 최신 정기보고서와, 3개년 추이용 사업보고서를 찾는다.
+    """회사별 최신 정기보고서와, 3개년·분기 추이에 필요한 그 이전 보고서들을 받는다.
 
-    반환: ({고유번호: (연도, 보고서코드, 행)}, {고유번호: (연도, 행)})
+    반환: ({고유번호: 최신순 보고서 목록 [(연도, 보고서코드)]}, {(연도, 보고서코드): {고유번호: 행}})
     """
 
     candidates = dart_api.candidate_reports(today)
 
-    latest = {}
-    remaining = set(corp_codes)
-    for year, reprt_code in candidates[:dart_api.MAX_REPORT_LOOKUPS]:
-        if not remaining:
+    latest_index = {}
+    reports = {}
+    for index, (year, reprt_code) in enumerate(candidates):
+        wanted = []
+        for corp_code in corp_codes:
+            if corp_code in latest_index:
+                periods = candidates[latest_index[corp_code]:]
+                if index < latest_index[corp_code] + dart_api.report_history(periods):
+                    wanted.append(corp_code)
+            elif index < dart_api.MAX_REPORT_LOOKUPS:
+                wanted.append(corp_code)
+        if not wanted:
             break
-        found = dart_api.fetch_key_accounts_multi(sorted(remaining), year, reprt_code)
-        for corp_code, rows in found.items():
-            latest[corp_code] = (year, reprt_code, rows)
-        remaining -= found.keys()
-        print(f"{year}년 {dart_api.REPORT_LABELS[reprt_code]} 보고서: {len(found)}개사 (남은 회사 {len(remaining)})")
 
-    annual = {
-        corp_code: (year, rows)
-        for corp_code, (year, reprt_code, rows) in latest.items()
-        if reprt_code == dart_api.REPORT_ANNUAL
-    }
-    remaining = set(latest) - set(annual)
-    annual_years = [year for year, reprt_code in candidates if reprt_code == dart_api.REPORT_ANNUAL]
-    for year in annual_years[:dart_api.MAX_ANNUAL_LOOKUPS]:
-        if not remaining:
-            break
-        found = dart_api.fetch_key_accounts_multi(sorted(remaining), year, dart_api.REPORT_ANNUAL)
-        for corp_code, rows in found.items():
-            annual[corp_code] = (year, rows)
-        remaining -= found.keys()
-        print(f"{year}년 사업보고서(3개년 추이용): {len(found)}개사")
+        found = dart_api.fetch_key_accounts_multi(sorted(wanted), year, reprt_code)
+        reports[(year, reprt_code)] = {
+            corp_code: dart_api.trim_key_accounts(rows) for corp_code, rows in found.items()
+        }
+        for corp_code in found:
+            latest_index.setdefault(corp_code, index)
+        print(
+            f"{year}년 {dart_api.REPORT_LABELS[reprt_code]} 보고서: "
+            f"{len(wanted)}개사 조회, {len(found)}개사 제출"
+        )
 
-    return latest, annual
+    periods = {corp_code: candidates[index:] for corp_code, index in latest_index.items()}
+    return periods, reports
 
 
 def collect_disclosures(today):
@@ -125,13 +124,19 @@ def fetch_cash_flow(code, corp_code, year, reprt_code, fs_div):
     return value, False
 
 
-def build_stock(code, corp_code, latest, annual, disclosures, previous):
+def build_stock(code, corp_code, periods, reports, disclosures, previous):
     record = {"financials": None, "cash_flow_pending": False}
 
-    if corp_code in latest:
-        year, reprt_code, rows = latest[corp_code]
-        annual_year, annual_rows = annual.get(corp_code, (None, []))
-        financials = dart_api.build_financials(year, reprt_code, rows, annual_year, annual_rows, None)
+    if corp_code in periods:
+        company_periods = periods[corp_code]
+        company_reports = {
+            period: reports[period][corp_code]
+            for period in company_periods[:dart_api.report_history(company_periods)]
+            if corp_code in reports.get(period, {})
+        }
+        year, reprt_code = company_periods[0]
+        rows = company_reports[(year, reprt_code)]
+        financials = dart_api.build_financials(company_periods, company_reports, None)
 
         # 같은 보고서의 현금흐름을 이미 받아 뒀으면 그대로 쓰고, 보고서가 바뀐 종목만 새로 받는다.
         prev = previous.get(code) or {}
@@ -184,7 +189,7 @@ def main():
     print(f"전체 종목 수: {len(codes)} (DART 등록 {len(registered)})")
 
     previous = load_previous()
-    latest, annual = collect_reports([corp_codes[code] for code in registered], today)
+    periods, reports = collect_reports([corp_codes[code] for code in registered], today)
     disclosures = collect_disclosures(today)
 
     stocks = {}
@@ -194,7 +199,7 @@ def main():
             # DART에 없는 종목(ETF 등)임을 앱이 알 수 있게 null로 남긴다.
             stocks[code] = None
             continue
-        stocks[code] = build_stock(code, corp_codes[code], latest, annual, disclosures, previous)
+        stocks[code] = build_stock(code, corp_codes[code], periods, reports, disclosures, previous)
         if (i + 1) % 200 == 0:
             print(f"[{i + 1}/{len(codes)}] 종목별 정리 진행 중 ({time.time() - fetched_before:.0f}초)")
 

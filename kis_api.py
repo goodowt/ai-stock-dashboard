@@ -25,6 +25,8 @@ BASE_URL = "https://openapivts.koreainvestment.com:29443"
 TR_ID_CURRENT_PRICE = "FHKST01010100"
 TR_ID_DAILY_CHART = "FHKST03010100"
 TR_ID_MINUTE_CHART = "FHKST03010200"
+TR_ID_INVESTOR = "FHKST01010900"
+TR_ID_INVEST_OPINION = "FHKST663300C0"
 
 
 class KISAPIError(Exception):
@@ -231,6 +233,7 @@ def fetch_current_price(code: str) -> dict:
         "PBR": to_float("pbr"),
         "EPS": to_float("eps"),
         "BPS": to_float("bps"),
+        "업종": (output.get("bstp_kor_isnm") or "").strip(),
     }
 
 
@@ -312,3 +315,72 @@ def fetch_minute_chart(code: str) -> pd.DataFrame:
     df = df.dropna(subset=["Open", "High", "Low", "Close"])
 
     return df[["Open", "High", "Low", "Close", "Volume"]]
+
+
+def fetch_investor_trend(code: str) -> pd.DataFrame:
+    """투자자별 일별 순매수(최근 약 30거래일). 금액 단위는 원, 날짜 오름차순.
+
+    장중에는 당일 행의 값이 비어 있는데, 그런 행은 뺀다.
+    """
+
+    data = _request(
+        "/uapi/domestic-stock/v1/quotations/inquire-investor",
+        TR_ID_INVESTOR,
+        {"fid_cond_mrkt_div_code": "J", "fid_input_iscd": code},
+    )
+
+    rows = data.get("output", [])
+    columns = ["외국인", "기관", "개인"]
+    if not rows:
+        return pd.DataFrame(columns=columns)
+
+    df = pd.DataFrame(rows).rename(columns={
+        "stck_bsop_date": "Date",
+        "frgn_ntby_tr_pbmn": "외국인",
+        "orgn_ntby_tr_pbmn": "기관",
+        "prsn_ntby_tr_pbmn": "개인",
+    })
+    for col in columns:
+        # KIS는 순매수 금액을 백만원 단위로 준다.
+        df[col] = pd.to_numeric(df[col], errors="coerce") * 1_000_000
+
+    df["Date"] = pd.to_datetime(df["Date"], format="%Y%m%d", errors="coerce")
+    df = df.dropna(subset=["Date"] + columns).set_index("Date").sort_index()
+    return df[columns]
+
+
+def fetch_invest_opinions(code: str, start: datetime, end: datetime) -> list:
+    """증권사 리포트의 투자의견·목표주가 목록(최신순).
+
+    각 항목: 날짜(YYYYMMDD) / 증권사 / 의견 / 직전의견 / 목표가(없으면 0)
+    """
+
+    data = _request(
+        "/uapi/domestic-stock/v1/quotations/invest-opinion",
+        TR_ID_INVEST_OPINION,
+        {
+            "fid_cond_mrkt_div_code": "J",
+            "fid_cond_scr_div_code": "16633",
+            "fid_input_iscd": code,
+            "fid_input_date_1": start.strftime("%Y%m%d"),
+            "fid_input_date_2": end.strftime("%Y%m%d"),
+        },
+    )
+
+    def to_float(value):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return 0.0
+
+    opinions = [
+        {
+            "날짜": row.get("stck_bsop_date", ""),
+            "증권사": (row.get("mbcr_name") or "").strip(),
+            "의견": (row.get("invt_opnn") or "").strip(),
+            "직전의견": (row.get("rgbf_invt_opnn") or "").strip(),
+            "목표가": to_float(row.get("hts_goal_prc")),
+        }
+        for row in data.get("output") or []
+    ]
+    return sorted(opinions, key=lambda o: o["날짜"], reverse=True)

@@ -27,6 +27,9 @@ REPORT_HALF = "11012"
 REPORT_Q3 = "11014"
 REPORT_ANNUAL = "11011"
 
+# 보고서 코드 -> 그 보고서가 새로 담는 분기
+REPORT_QUARTER = {REPORT_Q1: 1, REPORT_HALF: 2, REPORT_Q3: 3, REPORT_ANNUAL: 4}
+
 REPORT_LABELS = {
     REPORT_Q1: "1분기",
     REPORT_HALF: "상반기 누적",
@@ -234,9 +237,6 @@ def candidate_reports(today: date):
 
 MAX_REPORT_LOOKUPS = 5
 
-# 직전 연도 사업보고서가 아직 안 나온 연초를 감안해, 3개년 추이용 사업보고서는 2개 연도까지 찾아본다.
-MAX_ANNUAL_LOOKUPS = 2
-
 
 def _fetch_key_accounts(corp_code, year, reprt_code):
     return _request_json(
@@ -322,15 +322,101 @@ def _annual_trend(rows, year):
     return trend
 
 
-def build_financials(year, reprt_code, all_rows, annual_year, annual_all_rows, cash_flow):
-    """한 회사의 주요 계정 응답(연결·개별이 섞인 원본 행)을 대시보드용 수치로 정리한다.
+# 대시보드가 실제로 쓰는 계정·필드. 전 종목의 여러 분기 보고서를 한꺼번에 메모리에 올리는
+# 수집 스크립트에서, 응답 원본 대신 이것만 남겨 둔다.
+_KEY_ACCOUNT_PREFIXES = ("매출액", "영업이익", "당기순이익", "자산총계", "부채총계", "자본총계", "유동자산")
+_KEY_ROW_FIELDS = (
+    "fs_div", "account_nm", "thstrm_amount", "thstrm_add_amount",
+    "frmtrm_amount", "frmtrm_add_amount", "bfefrmtrm_amount",
+)
 
-    annual_all_rows는 3개년 추이를 만들 사업보고서 응답(없으면 빈 목록),
-    cash_flow는 fetch_operating_cash_flow()로 따로 구한 값이다.
+
+def trim_key_accounts(all_rows):
+    rows, _ = _pick_statement_rows(all_rows)
+    return [
+        {field: row.get(field) for field in _KEY_ROW_FIELDS}
+        for row in rows
+        if (row.get("account_nm") or "").strip().startswith(_KEY_ACCOUNT_PREFIXES)
+    ]
+
+
+def _difference(total, part):
+    return total - part if total is not None and part is not None else None
+
+
+def _quarter_amounts(row, reprt_code, q3_row):
+    """손익 계정의 해당 분기 3개월치 (당기, 전년 동기). 구할 수 없으면 (None, None)."""
+
+    if row is None:
+        return None, None
+
+    if reprt_code == REPORT_ANNUAL:
+        # 4분기는 따로 공시되지 않아, 연간 금액에서 3분기 누적을 빼서 구한다.
+        if q3_row is None:
+            return None, None
+        return (
+            _difference(_to_number(row.get("thstrm_amount")), _to_number(q3_row.get("thstrm_add_amount"))),
+            _difference(_to_number(row.get("frmtrm_amount")), _to_number(q3_row.get("frmtrm_add_amount"))),
+        )
+
+    if reprt_code != REPORT_Q1 and _to_number(row.get("thstrm_add_amount")) is None:
+        # 누적 금액이 따로 없으면 당기 금액이 3개월치인지 누적인지 알 수 없다.
+        return None, None
+    return _to_number(row.get("thstrm_amount")), _to_number(row.get("frmtrm_amount"))
+
+
+QUARTERLY_TREND_COUNT = 4
+
+
+def build_quarterly_trend(periods, reports):
+    """최근 분기부터 연속된 최대 4개 분기의 3개월치 매출액·영업이익(과거 -> 최근).
+
+    periods: 이 회사의 최신 보고서부터 과거 순으로 나열한 [(연도, 보고서코드)]
+    reports: {(연도, 보고서코드): 주요 계정 행}
     """
 
-    rows, fs_div = _pick_statement_rows(all_rows)
-    annual_rows, _ = _pick_statement_rows(annual_all_rows)
+    trend = []
+    for year, reprt_code in periods[:QUARTERLY_TREND_COUNT]:
+        all_rows = reports.get((year, reprt_code))
+        if not all_rows:
+            break
+        rows, _ = _pick_statement_rows(all_rows)
+        q3_rows = []
+        if reprt_code == REPORT_ANNUAL:
+            q3_rows, _ = _pick_statement_rows(reports.get((year, REPORT_Q3)) or [])
+
+        entry = {"분기": f"{year} {REPORT_QUARTER[reprt_code]}Q"}
+        for name in ("매출액", "영업이익"):
+            current, previous = _quarter_amounts(
+                _find_account(rows, name), reprt_code, _find_account(q3_rows, name)
+            )
+            entry[name] = current
+            entry[f"{name}_전년"] = previous
+        if entry["매출액"] is None and entry["영업이익"] is None:
+            break
+        trend.append(entry)
+    return trend[::-1]
+
+
+def build_financials(periods, reports, cash_flow):
+    """한 회사의 주요 계정 응답을 대시보드용 수치로 정리한다.
+
+    periods: 이 회사의 최신 보고서부터 과거 순으로 나열한 [(연도, 보고서코드)]. periods[0]이 기준 보고서다.
+    reports: {(연도, 보고서코드): 주요 계정 행}. periods[0]은 반드시 들어 있어야 한다.
+    cash_flow: fetch_operating_cash_flow()로 따로 구한 값.
+    """
+
+    year, reprt_code = periods[0]
+    rows, fs_div = _pick_statement_rows(reports[(year, reprt_code)])
+
+    # 최근 3개년 추이는 사업보고서에서만 나온다. 연초에는 직전 연도 사업보고서가 아직
+    # 안 나왔을 수 있으므로, 받아 둔 것 중 가장 최근 사업보고서를 쓴다.
+    annual_trend = []
+    for annual_year, code in periods:
+        if code == REPORT_ANNUAL and reports.get((annual_year, code)):
+            annual_rows, _ = _pick_statement_rows(reports[(annual_year, code)])
+            annual_trend = _annual_trend(annual_rows, annual_year)
+            break
 
     revenue, revenue_prev = _flow_amounts(_find_account(rows, "매출액"))
     operating_income, operating_income_prev = _flow_amounts(_find_account(rows, "영업이익"))
@@ -351,8 +437,22 @@ def build_financials(year, reprt_code, all_rows, annual_year, annual_all_rows, c
         # 은행·보험·증권 등은 유동/비유동을 구분하지 않는다. 부채비율 해석을 건너뛰는 데 쓴다.
         "유동성구분": _find_account(rows, "유동자산") is not None,
         "영업활동현금흐름": cash_flow,
-        "연간추이": _annual_trend(annual_rows, annual_year) if annual_rows else [],
+        "연간추이": annual_trend,
+        "분기추이": build_quarterly_trend(periods, reports),
     }
+
+
+def report_history(periods):
+    """재무 수치를 만드는 데 필요한 보고서 수(최신 보고서 포함).
+
+    분기 추이 4개 분기에 보고서 4개가 필요하고, 그중 가장 오래된 것이 사업보고서면
+    4분기 금액을 구하려고 같은 해 3분기 보고서가 하나 더 필요하다.
+    """
+
+    count = QUARTERLY_TREND_COUNT
+    if len(periods) >= count and periods[count - 1][1] == REPORT_ANNUAL:
+        count += 1
+    return count
 
 
 def fetch_financials(corp_code: str, today: date = None):
@@ -361,39 +461,33 @@ def fetch_financials(corp_code: str, today: date = None):
     today = today or datetime.now().date()
     candidates = candidate_reports(today)
 
-    latest = None
-    for year, reprt_code in candidates[:MAX_REPORT_LOOKUPS]:
+    periods = None
+    reports = {}
+    for i, (year, reprt_code) in enumerate(candidates[:MAX_REPORT_LOOKUPS]):
         rows = _fetch_key_accounts(corp_code, year, reprt_code)
         if rows:
-            latest = (year, reprt_code, rows)
+            periods = candidates[i:]
+            reports[(year, reprt_code)] = rows
             break
-    if latest is None:
+    if periods is None:
         return None
 
-    year, reprt_code, all_rows = latest
+    # 3개년 추이·분기 추이용 과거 보고서. 부가 정보라 실패하면 있는 것만으로 만든다.
+    for year, reprt_code in periods[1:report_history(periods)]:
+        try:
+            reports[(year, reprt_code)] = _fetch_key_accounts(corp_code, year, reprt_code)
+        except DARTAPIError:
+            break
 
-    # 최근 3개년 추이는 사업보고서에서만 나온다. 최신 보고서가 분·반기면 직전 사업보고서를 따로 받는다.
-    if reprt_code == REPORT_ANNUAL:
-        annual_year, annual_all_rows = year, all_rows
-    else:
-        annual_year, annual_all_rows = None, []
-        annual_years = [y for y, code in candidates if code == REPORT_ANNUAL]
-        for candidate_year in annual_years[:MAX_ANNUAL_LOOKUPS]:
-            try:
-                found = _fetch_key_accounts(corp_code, candidate_year, REPORT_ANNUAL)
-            except DARTAPIError:
-                break
-            if found:
-                annual_year, annual_all_rows = candidate_year, found
-                break
-
-    # 부가 지표라 실패해도 나머지 수치는 보여준다.
+    year, reprt_code = periods[0]
     try:
-        cash_flow = fetch_operating_cash_flow(corp_code, year, reprt_code, statement_division(all_rows))
+        cash_flow = fetch_operating_cash_flow(
+            corp_code, year, reprt_code, statement_division(reports[(year, reprt_code)])
+        )
     except DARTAPIError:
         cash_flow = None
 
-    return build_financials(year, reprt_code, all_rows, annual_year, annual_all_rows, cash_flow)
+    return build_financials(periods, reports, cash_flow)
 
 
 MAX_DISCLOSURE_PAGES = 10

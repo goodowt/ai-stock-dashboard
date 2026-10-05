@@ -4,6 +4,9 @@
 # 종목을 추려, MA20/Envelope 하단값과 함께 candidates.json에 저장한다.
 # 이렇게 미리 후보를 걸러두면, 장중 알림 스캔(envelope_alert.py)은
 # 전체 종목이 아니라 이 후보 목록만 조회하면 되어 훨씬 빠르고 API 호출이 적다.
+#
+# 전 종목 시세를 한 바퀴 도는 김에, 대시보드 AI 투자의견의 "업종 대비 밸류에이션"에 쓰는
+# 업종별 PER·PBR 중앙값(sector_valuation.json)도 같이 만든다.
 
 import csv
 import json
@@ -22,6 +25,7 @@ MARKET_CAP_THRESHOLD = 1_2000_0000_0000  # 1조 2천억원
 
 TICKERS_CSV = os.path.join(REPO_ROOT, "krx_tickers.csv")
 OUTPUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "candidates.json")
+SECTOR_OUTPUT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sector_valuation.json")
 
 
 def load_tickers():
@@ -41,13 +45,18 @@ def load_tickers():
 
 
 def filter_large_caps(tickers):
+    """(대형주 후보, 전 종목의 [업종, PER, PBR])"""
+
     large_caps = []
+    valuations = []
     for i, t in enumerate(tickers):
         try:
             info = kis_api.fetch_current_price(t["code"])
         except kis_api.KISAPIError as e:
             print(f"[{i + 1}/{len(tickers)}] {t['name']}({t['code']}) 시세 조회 실패: {e}")
             continue
+
+        valuations.append((info["업종"], info["PER"], info["PBR"]))
 
         market_cap = info["시가총액"] * 1_0000_0000  # KIS hts_avls는 억원 단위
         if market_cap >= MARKET_CAP_THRESHOLD:
@@ -56,7 +65,34 @@ def filter_large_caps(tickers):
         if (i + 1) % 200 == 0:
             print(f"[{i + 1}/{len(tickers)}] 진행 중 (대형주 후보 {len(large_caps)}개 발견)")
 
-    return large_caps
+    return large_caps, valuations
+
+
+def summarize_sectors(valuations):
+    """업종별 PER·PBR 중앙값. 적자(음수)나 값이 없는(0) 종목은 해당 지표의 표본에서 뺀다."""
+
+    df = pd.DataFrame(valuations, columns=["sector", "per", "pbr"])
+    sectors = {}
+    for sector, group in df.groupby("sector"):
+        if not sector:
+            continue
+        stats = {}
+        for key in ("per", "pbr"):
+            values = group.loc[group[key] > 0, key]
+            stats[key] = round(float(values.median()), 2) if len(values) else None
+            stats[f"{key}_count"] = int(len(values))
+        sectors[sector] = stats
+    return sectors
+
+
+def write_sector_valuation(valuations):
+    result = {
+        "generated_at": datetime.now(KST).isoformat(),
+        "sectors": summarize_sectors(valuations),
+    }
+    with open(SECTOR_OUTPUT_PATH, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    print(f"업종 통계: {len(result['sectors'])}개 업종 -> {SECTOR_OUTPUT_PATH}")
 
 
 def build_candidates(large_caps):
@@ -98,8 +134,9 @@ def main():
     tickers = load_tickers()
     print(f"전체 종목 수: {len(tickers)}")
 
-    large_caps = filter_large_caps(tickers)
+    large_caps, valuations = filter_large_caps(tickers)
     print(f"시가총액 {MARKET_CAP_THRESHOLD / 1_0000_0000_0000:.1f}조 이상 종목: {len(large_caps)}개")
+    write_sector_valuation(valuations)
 
     candidates = build_candidates(large_caps)
     print(f"MA20 계산 완료 종목: {len(candidates)}개")

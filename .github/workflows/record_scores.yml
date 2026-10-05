@@ -1,22 +1,23 @@
-name: Build large-cap candidates
+name: Record opinion scores
 
 on:
   schedule:
-    # 매일 15:50 KST(장마감 15:30 이후 여유를 둠) = 06:50 UTC, 평일만
-    - cron: "50 6 * * 1-5"
+    # 매일 16:40 KST(장마감 후) = 07:40 UTC, 평일만. 실제 실행은 몇 시간 밀릴 수 있지만,
+    # 점수는 실행 시각이 아니라 마지막 캔들의 거래일로 기록되므로 자정 전에만 돌면 된다.
+    - cron: "40 7 * * 1-5"
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 concurrency:
-  group: build-candidates
+  group: record-scores
   cancel-in-progress: false
 
 jobs:
-  build:
+  record:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -27,17 +28,17 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/requirements.txt
 
-      - name: Build candidates
+      - name: Record scores
         env:
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
-        run: python scripts/build_candidates.py
+        run: python scripts/record_scores.py
 
-      - name: Commit candidates.json
+      - name: Commit score history
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add scripts/candidates.json scripts/sector_valuation.json
-          git diff --staged --quiet || git commit -m "Update large-cap candidates"
+          git add scripts/score_history.csv
+          git diff --staged --quiet || git commit -m "Update opinion score history"
           git pull --rebase --autostash
           git push
