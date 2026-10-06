@@ -1,265 +1,237 @@
 {
-  "generated_at": "2026-10-06T01:33:32.319849+09:00",
+  "generated_at": "2026-10-07T00:05:28.287252+09:00",
   "market_cap_threshold": 1200000000000,
   "candidates": [
     {
       "name": "케이뱅크",
       "code": "279570",
       "market": "KOSPI",
-      "ma20": 5538.5,
-      "env_lower": 4430.8
-    },
-    {
-      "name": "에임드바이오",
-      "code": "0009K0",
-      "market": "KOSDAQ",
-      "ma20": 22822.5,
-      "env_lower": 18258.0
+      "ma20": 5536.0,
+      "env_lower": 4428.8
     },
     {
       "name": "삼성에피스홀딩스",
       "code": "0126Z0",
       "market": "KOSPI",
-      "ma20": 342800.0,
-      "env_lower": 274240.0
+      "ma20": 343550.0,
+      "env_lower": 274840.0
     },
     {
       "name": "대한조선",
       "code": "439260",
       "market": "KOSPI",
-      "ma20": 46480.0,
-      "env_lower": 37184.0
+      "ma20": 46540.0,
+      "env_lower": 37232.0
     },
     {
       "name": "달바글로벌",
       "code": "483650",
       "market": "KOSPI",
-      "ma20": 179600.0,
-      "env_lower": 143680.0
+      "ma20": 179170.0,
+      "env_lower": 143336.0
     },
     {
       "name": "서울보증보험",
       "code": "031210",
       "market": "KOSPI",
-      "ma20": 42782.5,
-      "env_lower": 34226.0
+      "ma20": 42627.5,
+      "env_lower": 34102.0
     },
     {
       "name": "LG씨엔에스",
       "code": "064400",
       "market": "KOSPI",
-      "ma20": 71260.0,
-      "env_lower": 57008.0
+      "ma20": 71320.0,
+      "env_lower": 57056.0
     },
     {
       "name": "KB발해인프라",
       "code": "415640",
       "market": "KOSPI",
-      "ma20": 10372.0,
-      "env_lower": 8297.6
+      "ma20": 10346.0,
+      "env_lower": 8276.8
     },
     {
       "name": "한화비전",
       "code": "489790",
       "market": "KOSPI",
-      "ma20": 47967.5,
-      "env_lower": 38374.0
+      "ma20": 48112.5,
+      "env_lower": 38490.0
     },
     {
       "name": "산일전기",
       "code": "062040",
       "market": "KOSPI",
-      "ma20": 202660.0,
-      "env_lower": 162128.0
+      "ma20": 205110.0,
+      "env_lower": 164088.0
     },
     {
       "name": "시프트업",
       "code": "462870",
       "market": "KOSPI",
-      "ma20": 31362.5,
-      "env_lower": 25090.0
+      "ma20": 31307.5,
+      "env_lower": 25046.0
     },
     {
       "name": "HD현대마린솔루션",
       "code": "443060",
       "market": "KOSPI",
-      "ma20": 231550.0,
-      "env_lower": 185240.0
-    },
-    {
-      "name": "디앤디파마텍",
-      "code": "347850",
-      "market": "KOSDAQ",
-      "ma20": 46020.0,
-      "env_lower": 36816.0
+      "ma20": 232550.0,
+      "env_lower": 186040.0
     },
     {
       "name": "SK이터닉스",
       "code": "475150",
       "market": "KOSPI",
-      "ma20": 50582.5,
-      "env_lower": 40466.0
+      "ma20": 50617.5,
+      "env_lower": 40494.0
     },
     {
       "name": "삼현",
       "code": "437730",
       "market": "KOSDAQ",
-      "ma20": 44910.0,
-      "env_lower": 35928.0
-    },
-    {
-      "name": "에이피알",
-      "code": "278470",
-      "market": "KOSPI",
-      "ma20": 369600.0,
-      "env_lower": 295680.0
+      "ma20": 46025.0,
+      "env_lower": 36820.0
     },
     {
       "name": "엘앤에프",
       "code": "066970",
       "market": "KOSPI",
-      "ma20": 114525.0,
-      "env_lower": 91620.0
+      "ma20": 114695.0,
+      "env_lower": 91756.0
     },
     {
       "name": "포스코DX",
       "code": "022100",
       "market": "KOSPI",
-      "ma20": 21068.0,
-      "env_lower": 16854.4
+      "ma20": 21098.0,
+      "env_lower": 16878.4
     },
     {
       "name": "에코프로머티",
       "code": "450080",
       "market": "KOSPI",
-      "ma20": 35782.5,
-      "env_lower": 28626.0
+      "ma20": 36020.0,
+      "env_lower": 28816.0
     },
     {
       "name": "두산로보틱스",
       "code": "454910",
       "market": "KOSPI",
-      "ma20": 69890.0,
-      "env_lower": 55912.0
+      "ma20": 70365.0,
+      "env_lower": 56292.0
     },
     {
       "name": "파두",
       "code": "440110",
       "market": "KOSDAQ",
-      "ma20": 71995.0,
-      "env_lower": 57596.0
+      "ma20": 73220.0,
+      "env_lower": 58576.0
     },
     {
       "name": "이수스페셜티케미컬",
       "code": "457190",
       "market": "KOSPI",
-      "ma20": 67070.0,
-      "env_lower": 53656.0
+      "ma20": 68090.0,
+      "env_lower": 54472.0
     },
     {
       "name": "기가비스",
       "code": "420770",
       "market": "KOSDAQ",
-      "ma20": 109935.0,
-      "env_lower": 87948.0
+      "ma20": 111715.0,
+      "env_lower": 89372.0
     },
     {
       "name": "HPSP",
       "code": "403870",
       "market": "KOSDAQ",
-      "ma20": 55865.0,
-      "env_lower": 44692.0
+      "ma20": 56800.0,
+      "env_lower": 45440.0
     },
     {
       "name": "보로노이",
       "code": "310210",
       "market": "KOSDAQ",
-      "ma20": 144855.0,
-      "env_lower": 115884.0
+      "ma20": 145300.0,
+      "env_lower": 116240.0
     },
     {
       "name": "LG에너지솔루션",
       "code": "373220",
       "market": "KOSPI",
-      "ma20": 360050.0,
-      "env_lower": 288040.0
+      "ma20": 361300.0,
+      "env_lower": 289040.0
     },
     {
       "name": "SK스퀘어",
       "code": "402340",
       "market": "KOSPI",
-      "ma20": 1093250.0,
-      "env_lower": 874600.0
+      "ma20": 1102600.0,
+      "env_lower": 882080.0
     },
     {
       "name": "카카오페이",
       "code": "377300",
       "market": "KOSPI",
-      "ma20": 43160.0,
-      "env_lower": 34528.0
+      "ma20": 42945.0,
+      "env_lower": 34356.0
     },
     {
       "name": "실리콘투",
       "code": "257720",
       "market": "KOSDAQ",
-      "ma20": 42320.0,
-      "env_lower": 33856.0
+      "ma20": 41722.5,
+      "env_lower": 33378.0
     },
     {
       "name": "HD현대중공업",
       "code": "329180",
       "market": "KOSPI",
-      "ma20": 448625.0,
-      "env_lower": 358900.0
+      "ma20": 447950.0,
+      "env_lower": 358360.0
     },
     {
       "name": "SK리츠",
       "code": "395400",
       "market": "KOSPI",
-      "ma20": 5269.0,
-      "env_lower": 4215.2
+      "ma20": 5267.5,
+      "env_lower": 4214.0
     },
     {
       "name": "롯데렌탈",
       "code": "089860",
       "market": "KOSPI",
-      "ma20": 49645.0,
-      "env_lower": 39716.0
+      "ma20": 49680.0,
+      "env_lower": 39744.0
     },
     {
       "name": "크래프톤",
       "code": "259960",
       "market": "KOSPI",
-      "ma20": 206215.0,
-      "env_lower": 164972.0
-    },
-    {
-      "name": "카카오뱅크",
-      "code": "323410",
-      "market": "KOSPI",
-      "ma20": 20852.5,
-      "env_lower": 16682.0
+      "ma20": 205275.0,
+      "env_lower": 164220.0
     },
     {
       "name": "F&F",
       "code": "383220",
       "market": "KOSPI",
-      "ma20": 67495.0,
-      "env_lower": 53996.0
+      "ma20": 67765.0,
+      "env_lower": 54212.0
     },
     {
       "name": "SK아이이테크놀로지",
       "code": "361610",
       "market": "KOSPI",
-      "ma20": 16633.5,
-      "env_lower": 13306.8
+      "ma20": 16748.5,
+      "env_lower": 13398.8
     },
     {
       "name": "스피어",
       "code": "347700",
       "market": "KOSDAQ",
-      "ma20": 21459.5,
-      "env_lower": 17167.6
+      "ma20": 21878.0,
+      "env_lower": 17502.4
     },
     {
       "name": "SK바이오사이언스",
@@ -272,1142 +244,1079 @@
       "name": "레인보우로보틱스",
       "code": "277810",
       "market": "KOSDAQ",
-      "ma20": 435150.0,
-      "env_lower": 348120.0
+      "ma20": 436675.0,
+      "env_lower": 349340.0
     },
     {
       "name": "DL이앤씨",
       "code": "375500",
       "market": "KOSPI",
-      "ma20": 81395.0,
-      "env_lower": 65116.0
+      "ma20": 81445.0,
+      "env_lower": 65156.0
+    },
+    {
+      "name": "티엘비",
+      "code": "356860",
+      "market": "KOSDAQ",
+      "ma20": 41080.0,
+      "env_lower": 32864.0
     },
     {
       "name": "하이브",
       "code": "352820",
       "market": "KOSPI",
-      "ma20": 167490.0,
-      "env_lower": 133992.0
+      "ma20": 166555.0,
+      "env_lower": 133244.0
     },
     {
       "name": "솔브레인",
       "code": "357780",
       "market": "KOSDAQ",
-      "ma20": 351650.0,
-      "env_lower": 281320.0
+      "ma20": 356625.0,
+      "env_lower": 285300.0
     },
     {
       "name": "에스케이바이오팜",
       "code": "326030",
       "market": "KOSPI",
-      "ma20": 79455.0,
-      "env_lower": 63564.0
+      "ma20": 78970.0,
+      "env_lower": 63176.0
     },
     {
       "name": "대덕전자",
       "code": "353200",
       "market": "KOSPI",
-      "ma20": 111535.0,
-      "env_lower": 89228.0
+      "ma20": 114290.0,
+      "env_lower": 91432.0
     },
     {
       "name": "제이앤티씨",
       "code": "204270",
       "market": "KOSDAQ",
-      "ma20": 22086.5,
-      "env_lower": 17669.2
+      "ma20": 22486.5,
+      "env_lower": 17989.2
     },
     {
       "name": "HD현대에너지솔루션",
       "code": "322000",
       "market": "KOSPI",
-      "ma20": 128680.0,
-      "env_lower": 102944.0
+      "ma20": 129780.0,
+      "env_lower": 103824.0
     },
     {
       "name": "한화시스템",
       "code": "272210",
       "market": "KOSPI",
-      "ma20": 73525.0,
-      "env_lower": 58820.0
+      "ma20": 74260.0,
+      "env_lower": 59408.0
     },
     {
       "name": "두산퓨얼셀",
       "code": "336260",
       "market": "KOSPI",
-      "ma20": 47810.0,
-      "env_lower": 38248.0
+      "ma20": 48245.0,
+      "env_lower": 38596.0
     },
     {
       "name": "태성",
       "code": "323280",
       "market": "KOSDAQ",
-      "ma20": 48510.0,
-      "env_lower": 38808.0
+      "ma20": 49442.5,
+      "env_lower": 39554.0
     },
     {
       "name": "포스코퓨처엠",
       "code": "003670",
       "market": "KOSPI",
-      "ma20": 183730.0,
-      "env_lower": 146984.0
+      "ma20": 184995.0,
+      "env_lower": 147996.0
     },
     {
       "name": "피에스케이",
       "code": "319660",
       "market": "KOSDAQ",
-      "ma20": 133475.0,
-      "env_lower": 106780.0
+      "ma20": 135055.0,
+      "env_lower": 108044.0
     },
     {
       "name": "현대무벡스",
       "code": "319400",
       "market": "KOSDAQ",
-      "ma20": 21375.0,
-      "env_lower": 17100.0
+      "ma20": 21370.0,
+      "env_lower": 17096.0
     },
     {
       "name": "현대오토에버",
       "code": "307950",
       "market": "KOSPI",
-      "ma20": 379325.0,
-      "env_lower": 303460.0
-    },
-    {
-      "name": "더블유게임즈",
-      "code": "192080",
-      "market": "KOSPI",
-      "ma20": 57770.0,
-      "env_lower": 46216.0
+      "ma20": 379550.0,
+      "env_lower": 303640.0
     },
     {
       "name": "에코프로비엠",
       "code": "247540",
       "market": "KOSDAQ",
-      "ma20": 108000.0,
-      "env_lower": 86400.0
+      "ma20": 109210.0,
+      "env_lower": 87368.0
     },
     {
       "name": "우리금융지주",
       "code": "316140",
       "market": "KOSPI",
-      "ma20": 35142.5,
-      "env_lower": 28114.0
+      "ma20": 35070.0,
+      "env_lower": 28056.0
     },
     {
       "name": "에이비엘바이오",
       "code": "298380",
       "market": "KOSDAQ",
-      "ma20": 59330.0,
-      "env_lower": 47464.0
+      "ma20": 58580.0,
+      "env_lower": 46864.0
     },
     {
       "name": "엘앤씨바이오",
       "code": "290650",
       "market": "KOSDAQ",
-      "ma20": 48485.0,
-      "env_lower": 38788.0
+      "ma20": 48690.0,
+      "env_lower": 38952.0
     },
     {
       "name": "로보티즈",
       "code": "108490",
       "market": "KOSDAQ",
-      "ma20": 301900.0,
-      "env_lower": 241520.0
+      "ma20": 305275.0,
+      "env_lower": 244220.0
     },
     {
       "name": "브이엠",
       "code": "089970",
       "market": "KOSDAQ",
-      "ma20": 55537.5,
-      "env_lower": 44430.0
+      "ma20": 56427.5,
+      "env_lower": 45142.0
     },
     {
       "name": "올릭스",
       "code": "226950",
       "market": "KOSDAQ",
-      "ma20": 104615.0,
-      "env_lower": 83692.0
+      "ma20": 106205.0,
+      "env_lower": 84964.0
     },
     {
       "name": "효성중공업",
       "code": "298040",
       "market": "KOSPI",
-      "ma20": 2834450.0,
-      "env_lower": 2267560.0
+      "ma20": 2838100.0,
+      "env_lower": 2270480.0
+    },
+    {
+      "name": "효성티앤씨",
+      "code": "298020",
+      "market": "KOSPI",
+      "ma20": 317475.0,
+      "env_lower": 253980.0
     },
     {
       "name": "IPARK현대산업개발",
       "code": "294870",
       "market": "KOSPI",
-      "ma20": 23562.5,
-      "env_lower": 18850.0
+      "ma20": 23490.0,
+      "env_lower": 18792.0
     },
     {
       "name": "셀트리온",
       "code": "068270",
       "market": "KOSPI",
-      "ma20": 180915.0,
-      "env_lower": 144732.0
+      "ma20": 180680.0,
+      "env_lower": 144544.0
     },
     {
       "name": "BGF리테일",
       "code": "282330",
       "market": "KOSPI",
-      "ma20": 140195.0,
-      "env_lower": 112156.0
+      "ma20": 139015.0,
+      "env_lower": 111212.0
     },
     {
       "name": "케이씨텍",
       "code": "281820",
       "market": "KOSPI",
-      "ma20": 75745.0,
-      "env_lower": 60596.0
+      "ma20": 77935.0,
+      "env_lower": 62348.0
     },
     {
       "name": "코오롱티슈진",
       "code": "950160",
       "market": "KOSDAQ",
-      "ma20": 16335.5,
-      "env_lower": 13068.4
-    },
-    {
-      "name": "펄어비스",
-      "code": "263750",
-      "market": "KOSDAQ",
-      "ma20": 34185.0,
-      "env_lower": 27348.0
+      "ma20": 16350.5,
+      "env_lower": 13080.4
     },
     {
       "name": "카카오",
       "code": "035720",
       "market": "KOSPI",
-      "ma20": 34340.0,
-      "env_lower": 27472.0
+      "ma20": 34252.5,
+      "env_lower": 27402.0
     },
     {
       "name": "오리온",
       "code": "271560",
       "market": "KOSPI",
-      "ma20": 115035.0,
-      "env_lower": 92028.0
+      "ma20": 113870.0,
+      "env_lower": 91096.0
     },
     {
       "name": "하림지주",
       "code": "003380",
       "market": "KOSDAQ",
-      "ma20": 11114.5,
-      "env_lower": 8891.6
+      "ma20": 11150.0,
+      "env_lower": 8920.0
     },
     {
       "name": "넷마블",
       "code": "251270",
       "market": "KOSPI",
-      "ma20": 35087.5,
-      "env_lower": 28070.0
+      "ma20": 34975.0,
+      "env_lower": 27980.0
     },
     {
       "name": "HD건설기계",
       "code": "267270",
       "market": "KOSPI",
-      "ma20": 134460.0,
-      "env_lower": 107568.0
+      "ma20": 133615.0,
+      "env_lower": 106892.0
     },
     {
       "name": "HD현대",
       "code": "267250",
       "market": "KOSPI",
-      "ma20": 222200.0,
-      "env_lower": 177760.0
+      "ma20": 221405.0,
+      "env_lower": 177124.0
     },
     {
       "name": "HD현대일렉트릭",
       "code": "267260",
       "market": "KOSPI",
-      "ma20": 713050.0,
-      "env_lower": 570440.0
+      "ma20": 712050.0,
+      "env_lower": 569640.0
     },
     {
       "name": "하나머티리얼즈",
       "code": "166090",
       "market": "KOSDAQ",
-      "ma20": 55237.5,
-      "env_lower": 44190.0
-    },
-    {
-      "name": "서진시스템",
-      "code": "178320",
-      "market": "KOSDAQ",
-      "ma20": 35567.5,
-      "env_lower": 28454.0
-    },
-    {
-      "name": "코미코",
-      "code": "183300",
-      "market": "KOSDAQ",
-      "ma20": 29537.5,
-      "env_lower": 23630.0
+      "ma20": 56030.0,
+      "env_lower": 44824.0
     },
     {
       "name": "두산밥캣",
       "code": "241560",
       "market": "KOSPI",
-      "ma20": 59645.0,
-      "env_lower": 47716.0
+      "ma20": 59265.0,
+      "env_lower": 47412.0
     },
     {
       "name": "삼성바이오로직스",
       "code": "207940",
       "market": "KOSPI",
-      "ma20": 1414250.0,
-      "env_lower": 1131400.0
+      "ma20": 1405700.0,
+      "env_lower": 1124560.0
     },
     {
       "name": "LS에코에너지",
       "code": "229640",
       "market": "KOSPI",
-      "ma20": 54940.0,
-      "env_lower": 43952.0
+      "ma20": 56147.5,
+      "env_lower": 44918.0
     },
     {
       "name": "동서",
       "code": "026960",
       "market": "KOSPI",
-      "ma20": 25685.0,
-      "env_lower": 20548.0
+      "ma20": 25740.0,
+      "env_lower": 20592.0
     },
     {
       "name": "에스티팜",
       "code": "237690",
       "market": "KOSDAQ",
-      "ma20": 92490.0,
-      "env_lower": 73992.0
+      "ma20": 92385.0,
+      "env_lower": 73908.0
     },
     {
       "name": "원익IPS",
       "code": "240810",
       "market": "KOSDAQ",
-      "ma20": 122035.0,
-      "env_lower": 97628.0
-    },
-    {
-      "name": "와이씨",
-      "code": "232140",
-      "market": "KOSDAQ",
-      "ma20": 12985.5,
-      "env_lower": 10388.4
+      "ma20": 123860.0,
+      "env_lower": 99088.0
     },
     {
       "name": "휴젤",
       "code": "145020",
       "market": "KOSDAQ",
-      "ma20": 215300.0,
-      "env_lower": 172240.0
+      "ma20": 212360.0,
+      "env_lower": 169888.0
     },
     {
       "name": "파크시스템스",
       "code": "140860",
       "market": "KOSDAQ",
-      "ma20": 262625.0,
-      "env_lower": 210100.0
+      "ma20": 265250.0,
+      "env_lower": 212200.0
     },
     {
       "name": "케어젠",
       "code": "214370",
       "market": "KOSDAQ",
-      "ma20": 41885.0,
-      "env_lower": 33508.0
+      "ma20": 41862.5,
+      "env_lower": 33490.0
     },
     {
       "name": "LIG디펜스앤에어로스페이스",
       "code": "079550",
       "market": "KOSPI",
-      "ma20": 691050.0,
-      "env_lower": 552840.0
+      "ma20": 693550.0,
+      "env_lower": 554840.0
     },
     {
       "name": "심텍",
       "code": "222800",
       "market": "KOSDAQ",
-      "ma20": 135870.0,
-      "env_lower": 108696.0
+      "ma20": 138540.0,
+      "env_lower": 110832.0
     },
     {
       "name": "파마리서치",
       "code": "214450",
       "market": "KOSDAQ",
-      "ma20": 339050.0,
-      "env_lower": 271240.0
+      "ma20": 335250.0,
+      "env_lower": 268200.0
     },
     {
       "name": "펩트론",
       "code": "087010",
       "market": "KOSDAQ",
-      "ma20": 145925.0,
-      "env_lower": 116740.0
+      "ma20": 145010.0,
+      "env_lower": 116008.0
     },
     {
       "name": "미래에셋생명",
       "code": "085620",
       "market": "KOSPI",
-      "ma20": 19602.0,
-      "env_lower": 15681.6
+      "ma20": 19570.5,
+      "env_lower": 15656.4
     },
     {
       "name": "RFHIC",
       "code": "218410",
       "market": "KOSDAQ",
-      "ma20": 53935.0,
-      "env_lower": 43148.0
+      "ma20": 54750.0,
+      "env_lower": 43800.0
     },
     {
       "name": "클래시스",
       "code": "214150",
       "market": "KOSDAQ",
-      "ma20": 31280.0,
-      "env_lower": 25024.0
+      "ma20": 31255.0,
+      "env_lower": 25004.0
     },
     {
       "name": "삼성물산",
       "code": "028260",
       "market": "KOSPI",
-      "ma20": 361025.0,
-      "env_lower": 288820.0
+      "ma20": 359550.0,
+      "env_lower": 287640.0
     },
     {
       "name": "알테오젠",
       "code": "196170",
       "market": "KOSDAQ",
-      "ma20": 264075.0,
-      "env_lower": 211260.0
+      "ma20": 263125.0,
+      "env_lower": 210500.0
     },
     {
       "name": "씨에스윈드",
       "code": "112610",
       "market": "KOSPI",
-      "ma20": 51050.0,
-      "env_lower": 40840.0
+      "ma20": 51650.0,
+      "env_lower": 41320.0
     },
     {
       "name": "삼성에스디에스",
       "code": "018260",
       "market": "KOSPI",
-      "ma20": 223500.0,
-      "env_lower": 178800.0
-    },
-    {
-      "name": "HL만도",
-      "code": "204320",
-      "market": "KOSPI",
-      "ma20": 47865.0,
-      "env_lower": 38292.0
+      "ma20": 223225.0,
+      "env_lower": 178580.0
     },
     {
       "name": "코스맥스",
       "code": "192820",
       "market": "KOSPI",
-      "ma20": 272775.0,
-      "env_lower": 218220.0
+      "ma20": 273625.0,
+      "env_lower": 218900.0
     },
     {
       "name": "현대로템",
       "code": "064350",
       "market": "KOSPI",
-      "ma20": 120530.0,
-      "env_lower": 96424.0
-    },
-    {
-      "name": "두산테스나",
-      "code": "131970",
-      "market": "KOSDAQ",
-      "ma20": 87625.0,
-      "env_lower": 70100.0
+      "ma20": 119875.0,
+      "env_lower": 95900.0
     },
     {
       "name": "한진칼",
       "code": "180640",
       "market": "KOSPI",
-      "ma20": 139315.0,
-      "env_lower": 111452.0
+      "ma20": 139295.0,
+      "env_lower": 111436.0
     },
     {
       "name": "NHN",
       "code": "181710",
       "market": "KOSPI",
-      "ma20": 58460.0,
-      "env_lower": 46768.0
+      "ma20": 58085.0,
+      "env_lower": 46468.0
     },
     {
       "name": "JB금융지주",
       "code": "175330",
       "market": "KOSPI",
-      "ma20": 30997.5,
-      "env_lower": 24798.0
+      "ma20": 30842.5,
+      "env_lower": 24674.0
     },
     {
       "name": "리가켐바이오",
       "code": "141080",
       "market": "KOSDAQ",
-      "ma20": 84630.0,
-      "env_lower": 67704.0
+      "ma20": 84405.0,
+      "env_lower": 67524.0
     },
     {
       "name": "한국콜마",
       "code": "161890",
       "market": "KOSPI",
-      "ma20": 145125.0,
-      "env_lower": 116100.0
+      "ma20": 144475.0,
+      "env_lower": 115580.0
     },
     {
       "name": "한국타이어앤테크놀로지",
       "code": "161390",
       "market": "KOSPI",
-      "ma20": 60880.0,
-      "env_lower": 48704.0
+      "ma20": 60560.0,
+      "env_lower": 48448.0
     },
     {
       "name": "메지온",
       "code": "140410",
       "market": "KOSDAQ",
-      "ma20": 72670.0,
-      "env_lower": 58136.0
+      "ma20": 72960.0,
+      "env_lower": 58368.0
     },
     {
       "name": "GS리테일",
       "code": "007070",
       "market": "KOSPI",
-      "ma20": 24015.0,
-      "env_lower": 19212.0
+      "ma20": 23840.0,
+      "env_lower": 19072.0
     },
     {
       "name": "테크윙",
       "code": "089030",
       "market": "KOSDAQ",
-      "ma20": 48292.5,
-      "env_lower": 38634.0
+      "ma20": 48835.0,
+      "env_lower": 39068.0
     },
     {
       "name": "한국항공우주",
       "code": "047810",
       "market": "KOSPI",
-      "ma20": 128985.0,
-      "env_lower": 103188.0
+      "ma20": 129240.0,
+      "env_lower": 103392.0
     },
     {
       "name": "이마트",
       "code": "139480",
       "market": "KOSPI",
-      "ma20": 73260.0,
-      "env_lower": 58608.0
+      "ma20": 73150.0,
+      "env_lower": 58520.0
     },
     {
       "name": "iM금융지주",
       "code": "139130",
       "market": "KOSPI",
-      "ma20": 18413.0,
-      "env_lower": 14730.4
+      "ma20": 18395.5,
+      "env_lower": 14716.4
     },
     {
       "name": "메리츠금융지주",
       "code": "138040",
       "market": "KOSPI",
-      "ma20": 129365.0,
-      "env_lower": 103492.0
+      "ma20": 128995.0,
+      "env_lower": 103196.0
     },
     {
       "name": "BNK금융지주",
       "code": "138930",
       "market": "KOSPI",
-      "ma20": 15860.5,
-      "env_lower": 12688.4
-    },
-    {
-      "name": "롯데에너지머티리얼즈",
-      "code": "020150",
-      "market": "KOSPI",
-      "ma20": 40680.0,
-      "env_lower": 32544.0
+      "ma20": 15864.0,
+      "env_lower": 12691.2
     },
     {
       "name": "현대위아",
       "code": "011210",
       "market": "KOSPI",
-      "ma20": 55185.0,
-      "env_lower": 44148.0
+      "ma20": 55010.0,
+      "env_lower": 44008.0
     },
     {
       "name": "티에스이",
       "code": "131290",
       "market": "KOSDAQ",
-      "ma20": 267075.0,
-      "env_lower": 213660.0
+      "ma20": 271325.0,
+      "env_lower": 217060.0
     },
     {
       "name": "한화엔진",
       "code": "082740",
       "market": "KOSPI",
-      "ma20": 48417.5,
-      "env_lower": 38734.0
+      "ma20": 48525.0,
+      "env_lower": 38820.0
     },
     {
       "name": "미스토홀딩스",
       "code": "081660",
       "market": "KOSPI",
-      "ma20": 39185.0,
-      "env_lower": 31348.0
+      "ma20": 39085.0,
+      "env_lower": 31268.0
     },
     {
       "name": "씨젠",
       "code": "096530",
       "market": "KOSDAQ",
-      "ma20": 33182.5,
-      "env_lower": 26546.0
+      "ma20": 33505.0,
+      "env_lower": 26804.0
     },
     {
       "name": "한미약품",
       "code": "128940",
       "market": "KOSPI",
-      "ma20": 492475.0,
-      "env_lower": 393980.0
+      "ma20": 496000.0,
+      "env_lower": 396800.0
     },
     {
       "name": "삼성생명",
       "code": "032830",
       "market": "KOSPI",
-      "ma20": 294450.0,
-      "env_lower": 235560.0
+      "ma20": 293575.0,
+      "env_lower": 234860.0
     },
     {
       "name": "한화생명",
       "code": "088350",
       "market": "KOSPI",
-      "ma20": 5781.5,
-      "env_lower": 4625.2
+      "ma20": 5740.5,
+      "env_lower": 4592.4
     },
     {
       "name": "코오롱인더",
       "code": "120110",
       "market": "KOSPI",
-      "ma20": 55645.0,
-      "env_lower": 44516.0
+      "ma20": 55635.0,
+      "env_lower": 44508.0
     },
     {
       "name": "한전기술",
       "code": "052690",
       "market": "KOSPI",
-      "ma20": 131465.0,
-      "env_lower": 105172.0
+      "ma20": 132580.0,
+      "env_lower": 106064.0
     },
     {
       "name": "SK",
       "code": "034730",
       "market": "KOSPI",
-      "ma20": 578850.0,
-      "env_lower": 463080.0
+      "ma20": 581200.0,
+      "env_lower": 464960.0
     },
     {
       "name": "비츠로셀",
       "code": "082920",
       "market": "KOSDAQ",
-      "ma20": 28505.0,
-      "env_lower": 22804.0
+      "ma20": 28602.5,
+      "env_lower": 22882.0
     },
     {
       "name": "키움증권",
       "code": "039490",
       "market": "KOSPI",
-      "ma20": 266275.0,
-      "env_lower": 213020.0
+      "ma20": 265575.0,
+      "env_lower": 212460.0
     },
     {
       "name": "영원무역",
       "code": "111770",
       "market": "KOSPI",
-      "ma20": 71975.0,
-      "env_lower": 57580.0
+      "ma20": 71650.0,
+      "env_lower": 57320.0
     },
     {
       "name": "HD현대마린엔진",
       "code": "071970",
       "market": "KOSPI",
-      "ma20": 50257.5,
-      "env_lower": 40206.0
+      "ma20": 50170.0,
+      "env_lower": 40136.0
     },
     {
       "name": "NAVER",
       "code": "035420",
       "market": "KOSPI",
-      "ma20": 202470.0,
-      "env_lower": 161976.0
+      "ma20": 201690.0,
+      "env_lower": 161352.0
     },
     {
       "name": "KB금융",
       "code": "105560",
       "market": "KOSPI",
-      "ma20": 174415.0,
-      "env_lower": 139532.0
+      "ma20": 173840.0,
+      "env_lower": 139072.0
     },
     {
       "name": "일진전기",
       "code": "103590",
       "market": "KOSPI",
-      "ma20": 74485.0,
-      "env_lower": 59588.0
+      "ma20": 75515.0,
+      "env_lower": 60412.0
     },
     {
       "name": "풍산",
       "code": "103140",
       "market": "KOSPI",
-      "ma20": 78045.0,
-      "env_lower": 62436.0
+      "ma20": 77985.0,
+      "env_lower": 62388.0
     },
     {
       "name": "LG이노텍",
       "code": "011070",
       "market": "KOSPI",
-      "ma20": 547850.0,
-      "env_lower": 438280.0
+      "ma20": 552800.0,
+      "env_lower": 442240.0
     },
     {
       "name": "고영",
       "code": "098460",
       "market": "KOSDAQ",
-      "ma20": 28917.5,
-      "env_lower": 23134.0
+      "ma20": 29352.5,
+      "env_lower": 23482.0
     },
     {
       "name": "테스",
       "code": "095610",
       "market": "KOSDAQ",
-      "ma20": 151440.0,
-      "env_lower": 121152.0
+      "ma20": 153595.0,
+      "env_lower": 122876.0
     },
     {
       "name": "LG유플러스",
       "code": "032640",
       "market": "KOSPI",
-      "ma20": 14714.0,
-      "env_lower": 11771.2
+      "ma20": 14700.5,
+      "env_lower": 11760.4
     },
     {
       "name": "아시아나항공",
       "code": "020560",
       "market": "KOSPI",
-      "ma20": 8048.5,
-      "env_lower": 6438.8
+      "ma20": 8072.0,
+      "env_lower": 6457.6
     },
     {
       "name": "한전KPS",
       "code": "051600",
       "market": "KOSPI",
-      "ma20": 46612.5,
-      "env_lower": 37290.0
+      "ma20": 46622.5,
+      "env_lower": 37298.0
     },
     {
       "name": "ISC",
       "code": "095340",
       "market": "KOSDAQ",
-      "ma20": 195130.0,
-      "env_lower": 156104.0
+      "ma20": 196745.0,
+      "env_lower": 157396.0
     },
     {
       "name": "CJ제일제당",
       "code": "097950",
       "market": "KOSPI",
-      "ma20": 179160.0,
-      "env_lower": 143328.0
+      "ma20": 178830.0,
+      "env_lower": 143064.0
     },
     {
       "name": "팬오션",
       "code": "028670",
       "market": "KOSPI",
-      "ma20": 5884.0,
-      "env_lower": 4707.2
+      "ma20": 5887.0,
+      "env_lower": 4709.6
     },
     {
       "name": "HJ중공업",
       "code": "097230",
       "market": "KOSPI",
-      "ma20": 15391.0,
-      "env_lower": 12312.8
+      "ma20": 15358.5,
+      "env_lower": 12286.8
     },
     {
       "name": "SK이노베이션",
       "code": "096770",
       "market": "KOSPI",
-      "ma20": 143090.0,
-      "env_lower": 114472.0
+      "ma20": 144520.0,
+      "env_lower": 115616.0
     },
     {
       "name": "에코프로",
       "code": "086520",
       "market": "KOSDAQ",
-      "ma20": 82645.0,
-      "env_lower": 66116.0
+      "ma20": 83345.0,
+      "env_lower": 66676.0
     },
     {
       "name": "삼성카드",
       "code": "029780",
       "market": "KOSPI",
-      "ma20": 44340.0,
-      "env_lower": 35472.0
+      "ma20": 44092.5,
+      "env_lower": 35274.0
     },
     {
       "name": "오스코텍",
       "code": "039200",
       "market": "KOSDAQ",
-      "ma20": 35762.5,
-      "env_lower": 28610.0
+      "ma20": 35920.0,
+      "env_lower": 28736.0
     },
     {
       "name": "후성",
       "code": "093370",
       "market": "KOSPI",
-      "ma20": 14005.5,
-      "env_lower": 11204.4
+      "ma20": 14205.0,
+      "env_lower": 11364.0
     },
     {
       "name": "아모레퍼시픽",
       "code": "090430",
       "market": "KOSPI",
-      "ma20": 141325.0,
-      "env_lower": 113060.0
+      "ma20": 140860.0,
+      "env_lower": 112688.0
     },
     {
       "name": "맥쿼리인프라",
       "code": "088980",
       "market": "KOSPI",
-      "ma20": 9823.5,
-      "env_lower": 7858.8
+      "ma20": 9815.5,
+      "env_lower": 7852.4
     },
     {
       "name": "롯데쇼핑",
       "code": "023530",
       "market": "KOSPI",
-      "ma20": 109650.0,
-      "env_lower": 87720.0
+      "ma20": 109395.0,
+      "env_lower": 87516.0
     },
     {
       "name": "셀트리온제약",
       "code": "068760",
       "market": "KOSDAQ",
-      "ma20": 39460.0,
-      "env_lower": 31568.0
+      "ma20": 39397.5,
+      "env_lower": 31518.0
     },
     {
       "name": "유진테크",
       "code": "084370",
       "market": "KOSDAQ",
-      "ma20": 147470.0,
-      "env_lower": 117976.0
+      "ma20": 149845.0,
+      "env_lower": 119876.0
     },
     {
       "name": "현대글로비스",
       "code": "086280",
       "market": "KOSPI",
-      "ma20": 202660.0,
-      "env_lower": 162128.0
+      "ma20": 202610.0,
+      "env_lower": 162088.0
     },
     {
       "name": "하나금융지주",
       "code": "086790",
       "market": "KOSPI",
-      "ma20": 135280.0,
-      "env_lower": 108224.0
+      "ma20": 134740.0,
+      "env_lower": 107792.0
     },
     {
       "name": "비에이치아이",
       "code": "083650",
       "market": "KOSDAQ",
-      "ma20": 63040.0,
-      "env_lower": 50432.0
+      "ma20": 63010.0,
+      "env_lower": 50408.0
     },
     {
       "name": "하나마이크론",
       "code": "067310",
       "market": "KOSDAQ",
-      "ma20": 40272.5,
-      "env_lower": 32218.0
+      "ma20": 41147.5,
+      "env_lower": 32918.0
     },
     {
       "name": "한미반도체",
       "code": "042700",
       "market": "KOSPI",
-      "ma20": 239925.0,
-      "env_lower": 191940.0
+      "ma20": 243350.0,
+      "env_lower": 194680.0
     },
     {
       "name": "금호타이어",
       "code": "073240",
       "market": "KOSPI",
-      "ma20": 7022.5,
-      "env_lower": 5618.0
+      "ma20": 7002.0,
+      "env_lower": 5601.6
     },
     {
       "name": "제주반도체",
       "code": "080220",
       "market": "KOSDAQ",
-      "ma20": 75620.0,
-      "env_lower": 60496.0
+      "ma20": 76865.0,
+      "env_lower": 61492.0
     },
     {
       "name": "대주전자재료",
       "code": "078600",
       "market": "KOSDAQ",
-      "ma20": 88545.0,
-      "env_lower": 70836.0
+      "ma20": 90005.0,
+      "env_lower": 72004.0
     },
     {
       "name": "GS",
       "code": "078930",
       "market": "KOSPI",
-      "ma20": 114745.0,
-      "env_lower": 91796.0
+      "ma20": 114170.0,
+      "env_lower": 91336.0
     },
     {
       "name": "LG디스플레이",
       "code": "034220",
       "market": "KOSPI",
-      "ma20": 8680.0,
-      "env_lower": 6944.0
+      "ma20": 8659.5,
+      "env_lower": 6927.6
     },
     {
       "name": "기업은행",
       "code": "024110",
       "market": "KOSPI",
-      "ma20": 20490.0,
-      "env_lower": 16392.0
+      "ma20": 20435.0,
+      "env_lower": 16348.0
     },
     {
       "name": "이수페타시스",
       "code": "007660",
       "market": "KOSPI",
-      "ma20": 111835.0,
-      "env_lower": 89468.0
+      "ma20": 113105.0,
+      "env_lower": 90484.0
     },
     {
       "name": "강원랜드",
       "code": "035250",
       "market": "KOSPI",
-      "ma20": 14550.0,
-      "env_lower": 11640.0
+      "ma20": 14527.5,
+      "env_lower": 11622.0
     },
     {
       "name": "티씨케이",
       "code": "064760",
       "market": "KOSDAQ",
-      "ma20": 273300.0,
-      "env_lower": 218640.0
+      "ma20": 276050.0,
+      "env_lower": 220840.0
     },
     {
       "name": "한국금융지주",
       "code": "071050",
       "market": "KOSPI",
-      "ma20": 186660.0,
-      "env_lower": 149328.0
+      "ma20": 186290.0,
+      "env_lower": 149032.0
     },
     {
       "name": "엔씨소프트",
       "code": "036570",
       "market": "KOSPI",
-      "ma20": 213800.0,
-      "env_lower": 171040.0
+      "ma20": 214075.0,
+      "env_lower": 171260.0
     },
     {
       "name": "현대백화점",
       "code": "069960",
       "market": "KOSPI",
-      "ma20": 96130.0,
-      "env_lower": 76904.0
+      "ma20": 95790.0,
+      "env_lower": 76632.0
     },
     {
       "name": "대웅제약",
       "code": "069620",
       "market": "KOSPI",
-      "ma20": 110850.0,
-      "env_lower": 88680.0
+      "ma20": 110555.0,
+      "env_lower": 88444.0
     },
     {
       "name": "에스피지",
       "code": "058610",
       "market": "KOSDAQ",
-      "ma20": 96645.0,
-      "env_lower": 77316.0
+      "ma20": 97775.0,
+      "env_lower": 78220.0
     },
     {
       "name": "LG전자",
       "code": "066570",
       "market": "KOSPI",
-      "ma20": 206135.0,
-      "env_lower": 164908.0
+      "ma20": 207825.0,
+      "env_lower": 166260.0
     },
     {
       "name": "LS마린솔루션",
       "code": "060370",
       "market": "KOSDAQ",
-      "ma20": 32287.5,
-      "env_lower": 25830.0
+      "ma20": 32542.5,
+      "env_lower": 26034.0
     },
     {
       "name": "성호전자",
       "code": "043260",
       "market": "KOSDAQ",
-      "ma20": 21690.0,
-      "env_lower": 17352.0
+      "ma20": 22527.5,
+      "env_lower": 18022.0
     },
     {
       "name": "신한지주",
       "code": "055550",
       "market": "KOSPI",
-      "ma20": 111060.0,
-      "env_lower": 88848.0
-    },
-    {
-      "name": "JYP Ent.",
-      "code": "035900",
-      "market": "KOSDAQ",
-      "ma20": 38550.0,
-      "env_lower": 30840.0
+      "ma20": 110470.0,
+      "env_lower": 88376.0
     },
     {
       "name": "코웨이",
       "code": "021240",
       "market": "KOSPI",
-      "ma20": 100280.0,
-      "env_lower": 80224.0
+      "ma20": 100345.0,
+      "env_lower": 80276.0
     },
     {
       "name": "SFA반도체",
       "code": "036540",
       "market": "KOSDAQ",
-      "ma20": 8644.0,
-      "env_lower": 6915.2
+      "ma20": 8938.0,
+      "env_lower": 7150.4
     },
     {
       "name": "LG생활건강",
       "code": "051900",
       "market": "KOSPI",
-      "ma20": 290600.0,
-      "env_lower": 232480.0
+      "ma20": 289350.0,
+      "env_lower": 231480.0
     },
     {
       "name": "LG화학",
       "code": "051910",
       "market": "KOSPI",
-      "ma20": 267500.0,
-      "env_lower": 214000.0
+      "ma20": 267075.0,
+      "env_lower": 213660.0
     },
     {
       "name": "대우건설",
       "code": "047040",
       "market": "KOSPI",
-      "ma20": 18435.0,
-      "env_lower": 14748.0
+      "ma20": 18483.0,
+      "env_lower": 14786.4
     },
     {
       "name": "포스코인터내셔널",
       "code": "047050",
       "market": "KOSPI",
-      "ma20": 56175.0,
-      "env_lower": 44940.0
+      "ma20": 56275.0,
+      "env_lower": 45020.0
     },
     {
       "name": "한화오션",
       "code": "042660",
       "market": "KOSPI",
-      "ma20": 82980.0,
-      "env_lower": 66384.0
+      "ma20": 82540.0,
+      "env_lower": 66032.0
     },
     {
       "name": "두산에너빌리티",
       "code": "034020",
       "market": "KOSPI",
-      "ma20": 84790.0,
-      "env_lower": 67832.0
+      "ma20": 84895.0,
+      "env_lower": 67916.0
     },
     {
       "name": "삼천당제약",
       "code": "000250",
       "market": "KOSDAQ",
-      "ma20": 166330.0,
-      "env_lower": 133064.0
-    },
-    {
-      "name": "이오테크닉스",
-      "code": "039030",
-      "market": "KOSDAQ",
-      "ma20": 470825.0,
-      "env_lower": 376660.0
+      "ma20": 170735.0,
+      "env_lower": 136588.0
     },
     {
       "name": "우리기술",
       "code": "032820",
       "market": "KOSDAQ",
-      "ma20": 12816.5,
-      "env_lower": 10253.2
+      "ma20": 12934.0,
+      "env_lower": 10347.2
     },
     {
       "name": "에스엠",
       "code": "041510",
       "market": "KOSDAQ",
-      "ma20": 81940.0,
-      "env_lower": 65552.0
+      "ma20": 82115.0,
+      "env_lower": 65692.0
     },
     {
       "name": "주성엔지니어링",
       "code": "036930",
       "market": "KOSDAQ",
-      "ma20": 206870.0,
-      "env_lower": 165496.0
+      "ma20": 212495.0,
+      "env_lower": 169996.0
     },
     {
       "name": "동진쎄미켐",
       "code": "005290",
       "market": "KOSDAQ",
-      "ma20": 43337.5,
-      "env_lower": 34670.0
-    },
-    {
-      "name": "한국가스공사",
-      "code": "036460",
-      "market": "KOSPI",
-      "ma20": 35922.5,
-      "env_lower": 28738.0
+      "ma20": 43955.0,
+      "env_lower": 35164.0
     },
     {
       "name": "케이티앤지",
       "code": "033780",
       "market": "KOSPI",
-      "ma20": 173200.0,
-      "env_lower": 138560.0
+      "ma20": 173285.0,
+      "env_lower": 138628.0
     },
     {
       "name": "HD한국조선해양",
       "code": "009540",
       "market": "KOSPI",
-      "ma20": 341325.0,
-      "env_lower": 273060.0
+      "ma20": 340050.0,
+      "env_lower": 272040.0
     },
     {
       "name": "케이티",
       "code": "030200",
       "market": "KOSPI",
-      "ma20": 53065.0,
-      "env_lower": 42452.0
+      "ma20": 52950.0,
+      "env_lower": 42360.0
     },
     {
       "name": "제일기획",
       "code": "030000",
       "market": "KOSPI",
-      "ma20": 18355.5,
-      "env_lower": 14684.4
+      "ma20": 18337.0,
+      "env_lower": 14669.6
     },
     {
       "name": "SK가스",
       "code": "018670",
       "market": "KOSPI",
-      "ma20": 241675.0,
-      "env_lower": 193340.0
+      "ma20": 242700.0,
+      "env_lower": 194160.0
     },
     {
       "name": "다우기술",
@@ -1420,568 +1329,498 @@
       "name": "SKC",
       "code": "011790",
       "market": "KOSPI",
-      "ma20": 90575.0,
-      "env_lower": 72460.0
+      "ma20": 91985.0,
+      "env_lower": 73588.0
     },
     {
       "name": "피에스케이홀딩스",
       "code": "031980",
       "market": "KOSDAQ",
-      "ma20": 163085.0,
-      "env_lower": 130468.0
+      "ma20": 166515.0,
+      "env_lower": 133212.0
     },
     {
       "name": "SK하이닉스",
       "code": "000660",
       "market": "KOSPI",
-      "ma20": 1782100.0,
-      "env_lower": 1425680.0
+      "ma20": 1791450.0,
+      "env_lower": 1433160.0
     },
     {
       "name": "삼성E&A",
       "code": "028050",
       "market": "KOSPI",
-      "ma20": 49445.0,
-      "env_lower": 39556.0
+      "ma20": 49537.5,
+      "env_lower": 39630.0
     },
     {
       "name": "HDC",
       "code": "012630",
       "market": "KOSPI",
-      "ma20": 25507.5,
-      "env_lower": 20406.0
+      "ma20": 25540.0,
+      "env_lower": 20432.0
     },
     {
       "name": "원익홀딩스",
       "code": "030530",
       "market": "KOSDAQ",
-      "ma20": 24833.5,
-      "env_lower": 19866.8
-    },
-    {
-      "name": "디아이",
-      "code": "003160",
-      "market": "KOSPI",
-      "ma20": 33412.5,
-      "env_lower": 26730.0
+      "ma20": 25505.0,
+      "env_lower": 20404.0
     },
     {
       "name": "한온시스템",
       "code": "018880",
       "market": "KOSPI",
-      "ma20": 3447.75,
-      "env_lower": 2758.2
+      "ma20": 3469.75,
+      "env_lower": 2775.8
     },
     {
       "name": "HLB",
       "code": "028300",
       "market": "KOSDAQ",
-      "ma20": 33905.0,
-      "env_lower": 27124.0
+      "ma20": 34612.5,
+      "env_lower": 27690.0
     },
     {
       "name": "현대엘리베이터",
       "code": "017800",
       "market": "KOSPI",
-      "ma20": 74000.0,
-      "env_lower": 59200.0
+      "ma20": 73910.0,
+      "env_lower": 59128.0
     },
     {
       "name": "에스원",
       "code": "012750",
       "market": "KOSPI",
-      "ma20": 82430.0,
-      "env_lower": 65944.0
+      "ma20": 82600.0,
+      "env_lower": 66080.0
     },
     {
       "name": "HMM",
       "code": "011200",
       "market": "KOSPI",
-      "ma20": 21005.0,
-      "env_lower": 16804.0
+      "ma20": 21015.0,
+      "env_lower": 16812.0
     },
     {
       "name": "대한광통신",
       "code": "010170",
       "market": "KOSDAQ",
-      "ma20": 15735.5,
-      "env_lower": 12588.4
+      "ma20": 16029.0,
+      "env_lower": 12823.2
     },
     {
       "name": "오뚜기",
       "code": "007310",
       "market": "KOSPI",
-      "ma20": 323375.0,
-      "env_lower": 258700.0
+      "ma20": 322225.0,
+      "env_lower": 257780.0
     },
     {
       "name": "엘에스일렉트릭",
       "code": "010120",
       "market": "KOSPI",
-      "ma20": 203990.0,
-      "env_lower": 163192.0
+      "ma20": 205285.0,
+      "env_lower": 164228.0
     },
     {
       "name": "삼성중공업",
       "code": "010140",
       "market": "KOSPI",
-      "ma20": 20781.0,
-      "env_lower": 16624.8
+      "ma20": 20687.5,
+      "env_lower": 16550.0
     },
     {
       "name": "네이처셀",
       "code": "007390",
       "market": "KOSDAQ",
-      "ma20": 24765.0,
-      "env_lower": 19812.0
-    },
-    {
-      "name": "롯데케미칼",
-      "code": "011170",
-      "market": "KOSPI",
-      "ma20": 62240.0,
-      "env_lower": 49792.0
+      "ma20": 24802.5,
+      "env_lower": 19842.0
     },
     {
       "name": "세아베스틸지주",
       "code": "001430",
       "market": "KOSPI",
-      "ma20": 43507.5,
-      "env_lower": 34806.0
+      "ma20": 43840.0,
+      "env_lower": 35072.0
     },
     {
       "name": "호텔신라",
       "code": "008770",
       "market": "KOSPI",
-      "ma20": 40835.0,
-      "env_lower": 32668.0
+      "ma20": 40705.0,
+      "env_lower": 32564.0
     },
     {
       "name": "고려아연",
       "code": "010130",
       "market": "KOSPI",
-      "ma20": 1146600.0,
-      "env_lower": 917280.0
+      "ma20": 1140600.0,
+      "env_lower": 912480.0
     },
     {
       "name": "한올바이오파마",
       "code": "009420",
       "market": "KOSPI",
-      "ma20": 49097.5,
-      "env_lower": 39278.0
+      "ma20": 48780.0,
+      "env_lower": 39024.0
     },
     {
       "name": "SK텔레콤",
       "code": "017670",
       "market": "KOSPI",
-      "ma20": 88980.0,
-      "env_lower": 71184.0
-    },
-    {
-      "name": "현대모비스",
-      "code": "012330",
-      "market": "KOSPI",
-      "ma20": 393300.0,
-      "env_lower": 314640.0
+      "ma20": 88950.0,
+      "env_lower": 71160.0
     },
     {
       "name": "현대해상",
       "code": "001450",
       "market": "KOSPI",
-      "ma20": 49487.5,
-      "env_lower": 39590.0
+      "ma20": 49157.5,
+      "env_lower": 39326.0
     },
     {
       "name": "현대지에프홀딩스",
       "code": "005440",
       "market": "KOSPI",
-      "ma20": 12832.5,
-      "env_lower": 10266.0
+      "ma20": 12855.5,
+      "env_lower": 10284.4
     },
     {
       "name": "한국전력공사",
       "code": "015760",
       "market": "KOSPI",
-      "ma20": 31495.0,
-      "env_lower": 25196.0
+      "ma20": 31382.5,
+      "env_lower": 25106.0
     },
     {
       "name": "녹십자",
       "code": "006280",
       "market": "KOSPI",
-      "ma20": 125565.0,
-      "env_lower": 100452.0
-    },
-    {
-      "name": "한솔케미칼",
-      "code": "014680",
-      "market": "KOSPI",
-      "ma20": 220605.0,
-      "env_lower": 176484.0
+      "ma20": 125570.0,
+      "env_lower": 100456.0
     },
     {
       "name": "동원산업",
       "code": "006040",
       "market": "KOSPI",
-      "ma20": 36545.0,
-      "env_lower": 29236.0
+      "ma20": 36405.0,
+      "env_lower": 29124.0
     },
     {
       "name": "에스엘",
       "code": "005850",
       "market": "KOSPI",
-      "ma20": 50677.5,
-      "env_lower": 40542.0
+      "ma20": 50737.5,
+      "env_lower": 40590.0
     },
     {
       "name": "영원무역홀딩스",
       "code": "009970",
       "market": "KOSPI",
-      "ma20": 167800.0,
-      "env_lower": 134240.0
+      "ma20": 167165.0,
+      "env_lower": 133732.0
     },
     {
       "name": "DN오토모티브",
       "code": "007340",
       "market": "KOSPI",
-      "ma20": 47420.0,
-      "env_lower": 37936.0
+      "ma20": 47580.0,
+      "env_lower": 38064.0
     },
     {
       "name": "한미사이언스",
       "code": "008930",
       "market": "KOSPI",
-      "ma20": 52405.0,
-      "env_lower": 41924.0
+      "ma20": 52730.0,
+      "env_lower": 42184.0
     },
     {
       "name": "POSCO홀딩스",
       "code": "005490",
       "market": "KOSPI",
-      "ma20": 323875.0,
-      "env_lower": 259100.0
-    },
-    {
-      "name": "삼성증권",
-      "code": "016360",
-      "market": "KOSPI",
-      "ma20": 87900.0,
-      "env_lower": 70320.0
+      "ma20": 322700.0,
+      "env_lower": 258160.0
     },
     {
       "name": "금호석유화학",
       "code": "011780",
       "market": "KOSPI",
-      "ma20": 121840.0,
-      "env_lower": 97472.0
+      "ma20": 121090.0,
+      "env_lower": 96872.0
     },
     {
       "name": "코스모신소재",
       "code": "005070",
       "market": "KOSPI",
-      "ma20": 41275.0,
-      "env_lower": 33020.0
+      "ma20": 41745.0,
+      "env_lower": 33396.0
     },
     {
       "name": "신영증권",
       "code": "001720",
       "market": "KOSPI",
-      "ma20": 143660.0,
-      "env_lower": 114928.0
-    },
-    {
-      "name": "가온전선",
-      "code": "000500",
-      "market": "KOSPI",
-      "ma20": 275425.0,
-      "env_lower": 220340.0
+      "ma20": 143270.0,
+      "env_lower": 114616.0
     },
     {
       "name": "S-Oil",
       "code": "010950",
       "market": "KOSPI",
-      "ma20": 154765.0,
-      "env_lower": 123812.0
+      "ma20": 155685.0,
+      "env_lower": 124548.0
     },
     {
       "name": "한화에어로스페이스",
       "code": "012450",
       "market": "KOSPI",
-      "ma20": 1054700.0,
-      "env_lower": 843760.0
+      "ma20": 1054300.0,
+      "env_lower": 843440.0
     },
     {
       "name": "현대제철",
       "code": "004020",
       "market": "KOSPI",
-      "ma20": 32835.0,
-      "env_lower": 26268.0
+      "ma20": 32750.0,
+      "env_lower": 26200.0
     },
     {
       "name": "코리아써키트",
       "code": "007810",
       "market": "KOSPI",
-      "ma20": 58927.5,
-      "env_lower": 47142.0
+      "ma20": 60797.5,
+      "env_lower": 48638.0
     },
     {
       "name": "신세계",
       "code": "004170",
       "market": "KOSPI",
-      "ma20": 364525.0,
-      "env_lower": 291620.0
+      "ma20": 361825.0,
+      "env_lower": 289460.0
     },
     {
       "name": "OCI홀딩스",
       "code": "010060",
       "market": "KOSPI",
-      "ma20": 214400.0,
-      "env_lower": 171520.0
+      "ma20": 215300.0,
+      "env_lower": 172240.0
     },
     {
       "name": "현대건설",
       "code": "000720",
       "market": "KOSPI",
-      "ma20": 124845.0,
-      "env_lower": 99876.0
+      "ma20": 124510.0,
+      "env_lower": 99608.0
     },
     {
       "name": "GS건설",
       "code": "006360",
       "market": "KOSPI",
-      "ma20": 35622.5,
-      "env_lower": 28498.0
+      "ma20": 35590.0,
+      "env_lower": 28472.0
     },
     {
       "name": "삼성SDI",
       "code": "006400",
       "market": "KOSPI",
-      "ma20": 536450.0,
-      "env_lower": 429160.0
-    },
-    {
-      "name": "삼성전기",
-      "code": "009150",
-      "market": "KOSPI",
-      "ma20": 1431500.0,
-      "env_lower": 1145200.0
+      "ma20": 538350.0,
+      "env_lower": 430680.0
     },
     {
       "name": "LS",
       "code": "006260",
       "market": "KOSPI",
-      "ma20": 311725.0,
-      "env_lower": 249380.0
+      "ma20": 312125.0,
+      "env_lower": 249700.0
     },
     {
       "name": "SK네트웍스",
       "code": "001740",
       "market": "KOSPI",
-      "ma20": 6304.5,
-      "env_lower": 5043.6
+      "ma20": 6316.0,
+      "env_lower": 5052.8
     },
     {
       "name": "농심",
       "code": "004370",
       "market": "KOSPI",
-      "ma20": 406775.0,
-      "env_lower": 325420.0
+      "ma20": 405175.0,
+      "env_lower": 324140.0
     },
     {
       "name": "삼화콘덴서공업",
       "code": "001820",
       "market": "KOSPI",
-      "ma20": 136445.0,
-      "env_lower": 109156.0
+      "ma20": 139160.0,
+      "env_lower": 111328.0
     },
     {
       "name": "한화",
       "code": "000880",
       "market": "KOSPI",
-      "ma20": 134255.0,
-      "env_lower": 107404.0
+      "ma20": 133970.0,
+      "env_lower": 107176.0
     },
     {
       "name": "LX인터내셔널",
       "code": "001120",
       "market": "KOSPI",
-      "ma20": 41080.0,
-      "env_lower": 32864.0
+      "ma20": 41242.5,
+      "env_lower": 32994.0
     },
     {
       "name": "DB하이텍",
       "code": "000990",
       "market": "KOSPI",
-      "ma20": 120010.0,
-      "env_lower": 96008.0
-    },
-    {
-      "name": "대신증권",
-      "code": "003540",
-      "market": "KOSPI",
-      "ma20": 26402.5,
-      "env_lower": 21122.0
+      "ma20": 122635.0,
+      "env_lower": 98108.0
     },
     {
       "name": "NH투자증권",
       "code": "005940",
       "market": "KOSPI",
-      "ma20": 26215.0,
-      "env_lower": 20972.0
+      "ma20": 26240.0,
+      "env_lower": 20992.0
     },
     {
       "name": "미래에셋증권",
       "code": "006800",
       "market": "KOSPI",
-      "ma20": 32787.5,
-      "env_lower": 26230.0
+      "ma20": 32735.0,
+      "env_lower": 26188.0
     },
     {
       "name": "삼성화재해상보험",
       "code": "000810",
       "market": "KOSPI",
-      "ma20": 655450.0,
-      "env_lower": 524360.0
-    },
-    {
-      "name": "삼양식품",
-      "code": "003230",
-      "market": "KOSPI",
-      "ma20": 1277000.0,
-      "env_lower": 1021600.0
+      "ma20": 651850.0,
+      "env_lower": 521480.0
     },
     {
       "name": "오리온홀딩스",
       "code": "001800",
       "market": "KOSPI",
-      "ma20": 24497.5,
-      "env_lower": 19598.0
+      "ma20": 24360.0,
+      "env_lower": 19488.0
     },
     {
       "name": "삼성전자",
       "code": "005930",
       "market": "KOSPI",
-      "ma20": 265325.0,
-      "env_lower": 212260.0
+      "ma20": 266475.0,
+      "env_lower": 213180.0
     },
     {
       "name": "현대자동차",
       "code": "005380",
       "market": "KOSPI",
-      "ma20": 367575.0,
-      "env_lower": 294060.0
+      "ma20": 365800.0,
+      "env_lower": 292640.0
     },
     {
       "name": "한화솔루션",
       "code": "009830",
       "market": "KOSPI",
-      "ma20": 30325.0,
-      "env_lower": 24260.0
+      "ma20": 30692.5,
+      "env_lower": 24554.0
     },
     {
       "name": "롯데지주",
       "code": "004990",
       "market": "KOSPI",
-      "ma20": 24610.0,
-      "env_lower": 19688.0
+      "ma20": 24532.5,
+      "env_lower": 19626.0
     },
     {
       "name": "기아",
       "code": "000270",
       "market": "KOSPI",
-      "ma20": 121220.0,
-      "env_lower": 96976.0
-    },
-    {
-      "name": "효성",
-      "code": "004800",
-      "market": "KOSPI",
-      "ma20": 160590.0,
-      "env_lower": 128472.0
+      "ma20": 120475.0,
+      "env_lower": 96380.0
     },
     {
       "name": "CJ",
       "code": "001040",
       "market": "KOSPI",
-      "ma20": 131110.0,
-      "env_lower": 104888.0
+      "ma20": 131200.0,
+      "env_lower": 104960.0
     },
     {
       "name": "두산",
       "code": "000150",
       "market": "KOSPI",
-      "ma20": 1342800.0,
-      "env_lower": 1074240.0
+      "ma20": 1360300.0,
+      "env_lower": 1088240.0
     },
     {
       "name": "DB손해보험",
       "code": "005830",
       "market": "KOSPI",
-      "ma20": 189110.0,
-      "env_lower": 151288.0
+      "ma20": 188130.0,
+      "env_lower": 150504.0
     },
     {
       "name": "케이씨씨",
       "code": "002380",
       "market": "KOSPI",
-      "ma20": 478150.0,
-      "env_lower": 382520.0
+      "ma20": 477725.0,
+      "env_lower": 382180.0
     },
     {
       "name": "아모레퍼시픽홀딩스",
       "code": "002790",
       "market": "KOSPI",
-      "ma20": 26192.5,
-      "env_lower": 20954.0
+      "ma20": 26140.0,
+      "env_lower": 20912.0
     },
     {
       "name": "LG",
       "code": "003550",
       "market": "KOSPI",
-      "ma20": 114645.0,
-      "env_lower": 91716.0
+      "ma20": 114460.0,
+      "env_lower": 91568.0
     },
     {
       "name": "코리안리",
       "code": "003690",
       "market": "KOSPI",
-      "ma20": 14806.5,
-      "env_lower": 11845.2
+      "ma20": 14754.5,
+      "env_lower": 11803.6
     },
     {
       "name": "대한전선",
       "code": "001440",
       "market": "KOSPI",
-      "ma20": 29442.5,
-      "env_lower": 23554.0
+      "ma20": 29687.5,
+      "env_lower": 23750.0
     },
     {
       "name": "한국앤컴퍼니",
       "code": "000240",
       "market": "KOSPI",
-      "ma20": 24675.0,
-      "env_lower": 19740.0
+      "ma20": 24720.0,
+      "env_lower": 19776.0
     },
     {
       "name": "대한항공",
       "code": "003490",
       "market": "KOSPI",
-      "ma20": 30197.5,
-      "env_lower": 24158.0
+      "ma20": 30290.0,
+      "env_lower": 24232.0
     },
     {
       "name": "유한양행",
       "code": "000100",
       "market": "KOSPI",
-      "ma20": 77215.0,
-      "env_lower": 61772.0
+      "ma20": 76960.0,
+      "env_lower": 61568.0
     },
     {
       "name": "CJ대한통운",
       "code": "000120",
       "market": "KOSPI",
-      "ma20": 71610.0,
-      "env_lower": 57288.0
+      "ma20": 71435.0,
+      "env_lower": 57148.0
     }
   ]
 }
