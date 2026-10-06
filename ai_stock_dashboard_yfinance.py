@@ -12,6 +12,7 @@ import feedparser
 
 import dart_api
 import investment_opinion
+import investor_flow
 import kis_api
 import score_validation
 from dart_api import DARTAPIError
@@ -274,6 +275,57 @@ def get_market_signals(code):
 
     return investor, opinions
 
+def get_investor_table(code, price_info):
+    """투자자별 매매동향 표(investor_flow.build_table). 조회에 실패하면 None."""
+
+    today = pd.Timestamp.now(tz="Asia/Seoul").tz_localize(None)
+    try:
+        daily = kis_api.fetch_investor_daily(code, today, investor_flow.PAGES)
+        exhaustion = kis_api.fetch_foreign_exhaustion(code)
+    except KISAPIError:
+        return None
+    if daily.empty:
+        return None
+    return investor_flow.build_table(daily, exhaustion, price_info)
+
+# 표 높이: 머리글 + 10거래일(2주). 나머지 날짜는 표 안에서 스크롤한다.
+FLOW_TABLE_HEIGHT = 38 + 35 * 10
+
+FLOW_FORMATS = {
+    "종가": "{:,.0f}",
+    "외국인 순매수": "{:+,.0f}",
+    "외국인 보유주수": "{:,.0f}",
+    "외국인 보유율": "{:.2f}%",
+    "외국인 추정평단": "{:,.0f}",
+    "기관 순매수": "{:+,.0f}",
+    investor_flow.INSTITUTION_NET: "{:+,.0f}",
+    "기관 상장주식 대비": "{:+.2f}%",
+    "기관 추정평단": "{:,.0f}",
+    "개인 순매수": "{:+,.0f}",
+}
+FLOW_SIGNED_COLUMNS = ["외국인 순매수", "기관 순매수", investor_flow.INSTITUTION_NET, "개인 순매수"]
+
+def color_net(value):
+    if pd.isna(value) or value == 0:
+        return ""
+    return "color: #d43f3f" if value > 0 else "color: #3f6fd4"
+
+def flow_card(label, value, note=""):
+    return (
+        f"**{label}**<br><span style='font-size:1.25rem'>{value}</span>"
+        f"<br><span style='font-size:0.8rem; opacity:0.75'>{note}</span>"
+    )
+
+def average_price_note(average, current):
+    if pd.isna(average) or not current:
+        return ""
+    gap = (current - average) / average * 100
+    css = "price-up" if gap >= 0 else "price-down"
+    return f"현재가는 평단 대비 <span class='{css}'>{gap:+.1f}%</span>"
+
+def format_number(value, pattern, empty="-"):
+    return empty if pd.isna(value) else pattern.format(value)
+
 def format_ratio(value, suffix, digits=1):
     return f"{value:,.{digits}f}{suffix}" if value else "-"
 
@@ -308,6 +360,7 @@ if refresh:
 
     financials, disclosures, disclosure_count, dart_notice = get_fundamentals(code)
     investor, opinions = get_market_signals(code)
+    flow = get_investor_table(code, price_info)
     sector_stats = (load_json(SECTOR_PATH) or {}).get("sectors")
 
     # ----------------------
@@ -373,6 +426,58 @@ if refresh:
 
         fig.update_layout(height=650, margin=dict(l=10, r=10, t=30, b=10))
         st.plotly_chart(fig, use_container_width=True)
+
+        # ----------------------
+        # 투자자별 매매동향
+        # ----------------------
+        st.markdown("#### 👥 투자자별 매매동향")
+        if flow is None:
+            st.caption("투자자별 매매 데이터를 가져오지 못했습니다.")
+        else:
+            latest = flow.iloc[0]
+            window = investor_flow.WINDOW
+            listed = price_info["상장주식수"]
+            foreign_held = price_info["외국인보유주수"] if listed else float("nan")
+            foreign_ratio = foreign_held / listed * 100 if listed else float("nan")
+
+            cards = [
+                ("외국인 보유주수", format_number(foreign_held, "{:,.0f}주"), ""),
+                ("외국인 보유율", format_number(foreign_ratio, "{:.2f}%"), "상장주식 대비"),
+                (
+                    "외국인 추정 평단가",
+                    format_number(latest["외국인 추정평단"], "{:,.0f}원"),
+                    average_price_note(latest["외국인 추정평단"], price_info["현재가"]),
+                ),
+                (
+                    f"기관 {window}일 순매수",
+                    format_number(latest[investor_flow.INSTITUTION_NET], "{:+,.0f}주"),
+                    "보유주수는 공개되지 않음",
+                ),
+                ("기관 순매수 비율", format_number(latest["기관 상장주식 대비"], "{:+.2f}%"), "상장주식 대비"),
+                (
+                    "기관 추정 평단가",
+                    format_number(latest["기관 추정평단"], "{:,.0f}원"),
+                    average_price_note(latest["기관 추정평단"], price_info["현재가"]),
+                ),
+            ]
+            for row_cards in (cards[:3], cards[3:]):
+                for column, card in zip(st.columns(3), row_cards):
+                    column.markdown(flow_card(*card), unsafe_allow_html=True)
+
+            flow_table = flow.copy()
+            flow_table.index = flow_table.index.strftime("%Y-%m-%d").rename("날짜")
+            st.dataframe(
+                flow_table.style.format(FLOW_FORMATS, na_rep="-").map(color_net, subset=FLOW_SIGNED_COLUMNS),
+                height=FLOW_TABLE_HEIGHT,
+            )
+            st.caption(
+                f"순매수·보유주수 단위는 주, 평단은 원입니다. 최근 {len(flow)}거래일을 최신순으로 보여 주며, "
+                "표 안에서 아래로 스크롤하면 이전 날짜가 나옵니다. "
+                "외국인 보유주수·보유율은 KIS가 최근 30거래일만 제공해 그 이전은 '-'입니다. "
+                f"기관은 보유 물량이 공개되지 않아 그날까지 {window}거래일의 순매수 합계로 대신했습니다. "
+                f"추정평단은 그날까지 {window}거래일 동안 매수한 물량의 평균 단가이며, "
+                "보유 물량 전체의 실제 매입가와는 다를 수 있습니다."
+            )
 
     with col_side:
         opinion = investment_opinion.generate_opinion(

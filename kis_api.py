@@ -27,6 +27,8 @@ TR_ID_DAILY_CHART = "FHKST03010100"
 TR_ID_MINUTE_CHART = "FHKST03010200"
 TR_ID_INVESTOR = "FHKST01010900"
 TR_ID_INVEST_OPINION = "FHKST663300C0"
+TR_ID_DAILY_PRICE = "FHKST01010400"
+TR_ID_INVESTOR_DAILY = "FHPTJ04160001"
 
 
 class KISAPIError(Exception):
@@ -234,6 +236,9 @@ def fetch_current_price(code: str) -> dict:
         "EPS": to_float("eps"),
         "BPS": to_float("bps"),
         "업종": (output.get("bstp_kor_isnm") or "").strip(),
+        "상장주식수": to_float("lstn_stcn"),
+        "외국인보유주수": to_float("frgn_hldn_qty"),
+        "외국인소진율": to_float("hts_frgn_ehrt"),
     }
 
 
@@ -347,6 +352,82 @@ def fetch_investor_trend(code: str) -> pd.DataFrame:
     df["Date"] = pd.to_datetime(df["Date"], format="%Y%m%d", errors="coerce")
     df = df.dropna(subset=["Date"] + columns).set_index("Date").sort_index()
     return df[columns]
+
+
+INVESTOR_NAMES = {"frgn": "외국인", "orgn": "기관", "prsn": "개인"}
+INVESTOR_DAILY_PAGE = 30  # 한 번 호출에 돌려주는 거래일 수
+
+
+def fetch_investor_daily(code: str, end: datetime, pages: int = 4) -> pd.DataFrame:
+    """종목별 투자자 일별 매매. end부터 과거로 30거래일씩 pages번 조회, 날짜 오름차순.
+
+    컬럼: 종가 / 평균가(당일 거래대금÷거래량) / 투자자별 `외국인_순매수`·`외국인_매수`(주),
+    `외국인_매수금액`(원) — 기관·개인도 같은 이름 규칙.
+    장중에는 당일 행의 값이 비어 있는데, 그런 행은 뺀다.
+    """
+
+    rows = []
+    base = end
+    for _ in range(pages):
+        data = _request(
+            "/uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily",
+            TR_ID_INVESTOR_DAILY,
+            {
+                "FID_COND_MRKT_DIV_CODE": "J",
+                "FID_INPUT_ISCD": code,
+                "FID_INPUT_DATE_1": base.strftime("%Y%m%d"),
+                "FID_ORG_ADJ_PRC": "",
+                "FID_ETC_CLS_CODE": "",
+            },
+        )
+        page = data.get("output2") or []
+        rows.extend(page)
+        if len(page) < INVESTOR_DAILY_PAGE:
+            break
+        oldest = min(row["stck_bsop_date"] for row in page)
+        base = datetime.strptime(oldest, "%Y%m%d") - timedelta(days=1)
+
+    fields = {"stck_bsop_date": "Date", "stck_clpr": "종가", "acml_vol": "거래량", "acml_tr_pbmn": "거래대금"}
+    for key, name in INVESTOR_NAMES.items():
+        fields[f"{key}_ntby_qty"] = f"{name}_순매수"
+        fields[f"{key}_shnu_vol"] = f"{name}_매수"
+        fields[f"{key}_shnu_tr_pbmn"] = f"{name}_매수금액"
+
+    df = pd.DataFrame(rows, columns=list(fields)).rename(columns=fields)
+    for col in df.columns.drop("Date"):
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    for name in INVESTOR_NAMES.values():
+        # KIS는 투자자별 금액을 백만원 단위로 준다.
+        df[f"{name}_매수금액"] *= 1_000_000
+
+    df["Date"] = pd.to_datetime(df["Date"], format="%Y%m%d", errors="coerce")
+    net_columns = [f"{name}_순매수" for name in INVESTOR_NAMES.values()]
+    df = df.dropna(subset=["Date"] + net_columns).drop_duplicates("Date").set_index("Date").sort_index()
+    df["평균가"] = (df["거래대금"] / df["거래량"].where(df["거래량"] > 0)).fillna(df["종가"])
+    return df.drop(columns=["거래량", "거래대금"])
+
+
+def fetch_foreign_exhaustion(code: str) -> pd.Series:
+    """일별 외국인 한도 소진율(%). 최근 30거래일만 제공된다. 날짜 오름차순.
+
+    소진율은 외국인 취득 한도 대비 비율이라, 한도가 있는 종목(통신·항공 등)은 지분율과 다르다.
+    """
+
+    data = _request(
+        "/uapi/domestic-stock/v1/quotations/inquire-daily-price",
+        TR_ID_DAILY_PRICE,
+        {
+            "fid_cond_mrkt_div_code": "J",
+            "fid_input_iscd": code,
+            "fid_period_div_code": "D",
+            "fid_org_adj_prc": "1",
+        },
+    )
+
+    df = pd.DataFrame(data.get("output") or [], columns=["stck_bsop_date", "hts_frgn_ehrt"])
+    df["Date"] = pd.to_datetime(df["stck_bsop_date"], format="%Y%m%d", errors="coerce")
+    df["소진율"] = pd.to_numeric(df["hts_frgn_ehrt"], errors="coerce")
+    return df.dropna(subset=["Date", "소진율"]).set_index("Date")["소진율"].sort_index()
 
 
 def fetch_invest_opinions(code: str, start: datetime, end: datetime) -> list:
