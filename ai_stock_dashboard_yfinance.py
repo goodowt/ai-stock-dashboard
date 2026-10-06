@@ -275,18 +275,33 @@ def get_market_signals(code):
 
     return investor, opinions
 
-def get_investor_table(code, price_info):
-    """투자자별 매매동향 표(investor_flow.build_table). 조회에 실패하면 None."""
+# 투자자별 매매는 장마감 뒤에야 당일분이 확정되므로, 새로고침할 때마다 다시 받지 않는다.
+@st.cache_data(ttl=600, show_spinner=False)
+def load_investor_daily(code, date):
+    return kis_api.fetch_investor_daily(code, pd.Timestamp(date), investor_flow.PAGES)
 
-    today = pd.Timestamp.now(tz="Asia/Seoul").tz_localize(None)
+@st.cache_data(ttl=600, show_spinner=False)
+def load_foreign_exhaustion(code, date):
+    return kis_api.fetch_foreign_exhaustion(code)
+
+def get_investor_table(code, price_info):
+    """(투자자별 매매동향 표, 안내 문구). 표를 만들지 못하면 표가 None이고 문구에 이유가 담긴다."""
+
+    today = pd.Timestamp.now(tz="Asia/Seoul").strftime("%Y-%m-%d")
     try:
-        daily = kis_api.fetch_investor_daily(code, today, investor_flow.PAGES)
-        exhaustion = kis_api.fetch_foreign_exhaustion(code)
-    except KISAPIError:
-        return None
+        daily = load_investor_daily(code, today)
+    except KISAPIError as e:
+        return None, f"투자자별 매매 데이터를 가져오지 못했습니다. 잠시 뒤 새로고침해 주세요. ({e})"
     if daily.empty:
-        return None
-    return investor_flow.build_table(daily, exhaustion, price_info)
+        return None, "KIS에 이 종목의 투자자별 매매 데이터가 없습니다."
+
+    notice = None
+    try:
+        exhaustion = load_foreign_exhaustion(code, today)
+    except KISAPIError as e:
+        exhaustion = pd.Series(dtype=float)
+        notice = f"외국인 보유 추이를 가져오지 못해 표의 외국인 보유주수·보유율은 비워 두었습니다. ({e})"
+    return investor_flow.build_table(daily, exhaustion, price_info), notice
 
 # 표 높이: 머리글 + 10거래일(2주). 나머지 날짜는 표 안에서 스크롤한다.
 FLOW_TABLE_HEIGHT = 38 + 35 * 10
@@ -360,7 +375,7 @@ if refresh:
 
     financials, disclosures, disclosure_count, dart_notice = get_fundamentals(code)
     investor, opinions = get_market_signals(code)
-    flow = get_investor_table(code, price_info)
+    flow, flow_notice = get_investor_table(code, price_info)
     sector_stats = (load_json(SECTOR_PATH) or {}).get("sectors")
 
     # ----------------------
@@ -431,9 +446,9 @@ if refresh:
         # 투자자별 매매동향
         # ----------------------
         st.markdown("#### 👥 투자자별 매매동향")
-        if flow is None:
-            st.caption("투자자별 매매 데이터를 가져오지 못했습니다.")
-        else:
+        if flow_notice:
+            st.caption(f"ℹ️ {flow_notice}")
+        if flow is not None:
             latest = flow.iloc[0]
             window = investor_flow.WINDOW
             listed = price_info["상장주식수"]

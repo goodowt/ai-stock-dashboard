@@ -7,6 +7,7 @@
 # 있으면 쓰고 없으면 환경변수·모듈 전역 변수로 대체한다.
 
 import os
+import random
 import threading
 import time
 from datetime import datetime, timedelta
@@ -146,6 +147,10 @@ def _throttle():
 
 MAX_NETWORK_RETRIES = 3
 
+# 초당 호출 제한은 앱키 단위라, 같은 키를 쓰는 GitHub Actions 배치가 여러 개 겹쳐 도는 시간에는
+# 호출의 절반가량이 EGW00201로 거절된다. 3번 재시도로는 앱의 조회가 자주 실패해서 넉넉히 잡는다.
+MAX_RATE_LIMIT_RETRIES = 8
+
 
 def _get(url, headers, params, _retry_count=0):
     """requests.get()을 네트워크 순단(ConnectionError, Timeout 등) 시 재시도한다.
@@ -186,8 +191,9 @@ def _request(path, tr_id, params, _retry_count=0):
 
     # 초당 호출 제한(EGW00201)은 HTTP 상태코드가 200이 아닌 경우에도 응답 본문에 담겨 오므로
     # status_code 체크보다 먼저 확인해서 재시도한다.
-    if isinstance(data, dict) and data.get("msg_cd") == "EGW00201" and _retry_count < 3:
-        time.sleep(1.0)
+    if isinstance(data, dict) and data.get("msg_cd") == "EGW00201" and _retry_count < MAX_RATE_LIMIT_RETRIES:
+        # 대기 시간을 조금씩 다르게 줘서, 같은 간격으로 호출하는 다른 실행과 엇갈리게 한다.
+        time.sleep(1.0 + random.uniform(0, 0.5))
         return _request(path, tr_id, params, _retry_count=_retry_count + 1)
 
     if res.status_code != 200:
