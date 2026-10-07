@@ -25,18 +25,6 @@
       "alerted_10d": false
     },
     {
-      "name": "비츠로테크",
-      "code": "042370",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-17",
-      "trigger_close": 11440.0,
-      "trigger_change_pct": 30.0,
-      "trigger_turnover": 102131824080.0,
-      "prior_3m_high": 9740.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "티이엠씨",
       "code": "425040",
       "market": "KOSDAQ",
@@ -70,18 +58,6 @@
       "trigger_turnover": 294160976800.0,
       "prior_3m_high": 9020.0,
       "alerted_5d": false,
-      "alerted_10d": false
-    },
-    {
-      "name": "동국생명과학",
-      "code": "303810",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-28",
-      "trigger_close": 3310.0,
-      "trigger_change_pct": 18.21428571428571,
-      "trigger_turnover": 110217763580.0,
-      "prior_3m_high": 3035.0,
-      "alerted_5d": true,
       "alerted_10d": false
     },
     {
