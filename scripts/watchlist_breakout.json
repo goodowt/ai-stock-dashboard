@@ -85,18 +85,6 @@
       "alerted_10d": false
     },
     {
-      "name": "나라스페이스테크놀로지",
-      "code": "478340",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-02",
-      "trigger_close": 17090.0,
-      "trigger_change_pct": 20.692090395480225,
-      "trigger_turnover": 162447422720.0,
-      "prior_3m_high": 14460.0,
-      "alerted_5d": false,
-      "alerted_10d": false
-    },
-    {
       "name": "아톤",
       "code": "158430",
       "market": "KOSDAQ",
