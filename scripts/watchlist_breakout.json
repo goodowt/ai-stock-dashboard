@@ -1,18 +1,6 @@
 {
   "items": [
     {
-      "name": "원익홀딩스",
-      "code": "030530",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-15",
-      "trigger_close": 25950.0,
-      "trigger_change_pct": 18.493150684931507,
-      "trigger_turnover": 258490233600.0,
-      "prior_3m_high": 24900.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "빛샘전자",
       "code": "072950",
       "market": "KOSDAQ",
@@ -33,7 +21,7 @@
       "trigger_change_pct": 26.31578947368421,
       "trigger_turnover": 112564818720.0,
       "prior_3m_high": 12410.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
@@ -49,18 +37,6 @@
       "alerted_10d": false
     },
     {
-      "name": "SFA반도체",
-      "code": "036540",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-21",
-      "trigger_close": 10610.0,
-      "trigger_change_pct": 17.627494456762747,
-      "trigger_turnover": 294160976800.0,
-      "prior_3m_high": 9020.0,
-      "alerted_5d": false,
-      "alerted_10d": false
-    },
-    {
       "name": "성호전자",
       "code": "043260",
       "market": "KOSDAQ",
@@ -69,7 +45,7 @@
       "trigger_change_pct": 15.644820295983086,
       "trigger_turnover": 168183984050.0,
       "prior_3m_high": 26950.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
@@ -81,7 +57,7 @@
       "trigger_change_pct": 29.950669485553206,
       "trigger_turnover": 107576562800.0,
       "prior_3m_high": 14610.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
@@ -105,7 +81,7 @@
       "trigger_change_pct": 19.40928270042194,
       "trigger_turnover": 1002696451000.0,
       "prior_3m_high": 241000.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
@@ -117,7 +93,7 @@
       "trigger_change_pct": 16.818181818181817,
       "trigger_turnover": 172100142520.0,
       "prior_3m_high": 4410.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
