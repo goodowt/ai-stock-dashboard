@@ -1,18 +1,6 @@
 {
   "items": [
     {
-      "name": "빛샘전자",
-      "code": "072950",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-09-16",
-      "trigger_close": 13910.0,
-      "trigger_change_pct": 30.0,
-      "trigger_turnover": 207967867510.0,
-      "prior_3m_high": 11240.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "티이엠씨",
       "code": "425040",
       "market": "KOSDAQ",
@@ -49,18 +37,6 @@
       "alerted_10d": false
     },
     {
-      "name": "티엠씨",
-      "code": "217590",
-      "market": "KOSPI",
-      "trigger_date": "2026-10-02",
-      "trigger_close": 18440.0,
-      "trigger_change_pct": 29.950669485553206,
-      "trigger_turnover": 107576562800.0,
-      "prior_3m_high": 14610.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "아톤",
       "code": "158430",
       "market": "KOSDAQ",
@@ -81,18 +57,6 @@
       "trigger_change_pct": 19.40928270042194,
       "trigger_turnover": 1002696451000.0,
       "prior_3m_high": 241000.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
-      "name": "빛과전자",
-      "code": "069540",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-06",
-      "trigger_close": 5140.0,
-      "trigger_change_pct": 16.818181818181817,
-      "trigger_turnover": 172100142520.0,
-      "prior_3m_high": 4410.0,
       "alerted_5d": true,
       "alerted_10d": false
     },
