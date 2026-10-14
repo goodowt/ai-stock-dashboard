@@ -37,18 +37,6 @@
       "alerted_10d": false
     },
     {
-      "name": "아톤",
-      "code": "158430",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-06",
-      "trigger_close": 7150.0,
-      "trigger_change_pct": 30.0,
-      "trigger_turnover": 140034172850.0,
-      "prior_3m_high": 6310.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "주성엔지니어링",
       "code": "036930",
       "market": "KOSDAQ",
