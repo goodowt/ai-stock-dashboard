@@ -1,18 +1,6 @@
 {
   "items": [
     {
-      "name": "동국산업",
-      "code": "005160",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-08",
-      "trigger_close": 4635.0,
-      "trigger_change_pct": 20.38961038961039,
-      "trigger_turnover": 106802474175.0,
-      "prior_3m_high": 4145.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "세아메카닉스",
       "code": "396300",
       "market": "KOSDAQ",
