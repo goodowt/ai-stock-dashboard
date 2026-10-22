@@ -33,18 +33,6 @@
       "trigger_change_pct": 24.895104895104893,
       "trigger_turnover": 106578317660.0,
       "prior_3m_high": 8660.0,
-      "alerted_5d": false,
-      "alerted_10d": false
-    },
-    {
-      "name": "삼기에너지솔루션즈",
-      "code": "419050",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-19",
-      "trigger_close": 2645.0,
-      "trigger_change_pct": 23.310023310023308,
-      "trigger_turnover": 146276551380.0,
-      "prior_3m_high": 2305.0,
       "alerted_5d": true,
       "alerted_10d": false
     }
