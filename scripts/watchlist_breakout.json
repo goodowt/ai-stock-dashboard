@@ -25,18 +25,6 @@
       "alerted_10d": false
     },
     {
-      "name": "빅텍",
-      "code": "065450",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-22",
-      "trigger_close": 3760.0,
-      "trigger_change_pct": 21.68284789644013,
-      "trigger_turnover": 121444390400.0,
-      "prior_3m_high": 3235.0,
-      "alerted_5d": false,
-      "alerted_10d": false
-    },
-    {
       "name": "삼성E&A",
       "code": "028050",
       "market": "KOSPI",
