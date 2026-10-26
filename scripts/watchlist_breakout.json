@@ -13,18 +13,6 @@
       "alerted_10d": false
     },
     {
-      "name": "에스엠벡셀",
-      "code": "010580",
-      "market": "KOSPI",
-      "trigger_date": "2026-10-15",
-      "trigger_close": 3155.0,
-      "trigger_change_pct": 18.164794007490638,
-      "trigger_turnover": 139512749660.0,
-      "prior_3m_high": 2845.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "삼성E&A",
       "code": "028050",
       "market": "KOSPI",
