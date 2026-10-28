@@ -1,18 +1,6 @@
 {
   "items": [
     {
-      "name": "세아메카닉스",
-      "code": "396300",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-14",
-      "trigger_close": 7230.0,
-      "trigger_change_pct": 15.127388535031846,
-      "trigger_turnover": 139255771980.0,
-      "prior_3m_high": 6280.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "삼성E&A",
       "code": "028050",
       "market": "KOSPI",
