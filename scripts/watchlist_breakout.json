@@ -9,7 +9,7 @@
       "trigger_change_pct": 17.61006289308176,
       "trigger_turnover": 692017230300.0,
       "prior_3m_high": 52000.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     },
     {
