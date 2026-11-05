@@ -13,18 +13,6 @@
       "alerted_10d": false
     },
     {
-      "name": "안랩",
-      "code": "053800",
-      "market": "KOSDAQ",
-      "trigger_date": "2026-10-28",
-      "trigger_close": 111600.0,
-      "trigger_change_pct": 20.388349514563107,
-      "trigger_turnover": 141774854400.0,
-      "prior_3m_high": 92700.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "한진칼",
       "code": "180640",
       "market": "KOSPI",
