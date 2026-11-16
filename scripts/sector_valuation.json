@@ -1,112 +1,112 @@
 {
-  "generated_at": "2026-11-10T03:08:54.773177+09:00",
+  "generated_at": "2026-11-17T02:39:22.410457+09:00",
   "sectors": {
     "IT 서비스": {
       "per": 11.83,
       "per_count": 139,
-      "pbr": 0.9,
+      "pbr": 0.87,
       "pbr_count": 236
     },
     "건설": {
-      "per": 6.74,
+      "per": 6.92,
       "per_count": 40,
-      "pbr": 0.48,
+      "pbr": 0.55,
       "pbr_count": 51
     },
     "금속": {
-      "per": 12.85,
+      "per": 12.91,
       "per_count": 69,
       "pbr": 0.46,
       "pbr_count": 120
     },
     "금융": {
-      "per": 10.04,
+      "per": 10.24,
       "per_count": 108,
-      "pbr": 0.72,
+      "pbr": 0.77,
       "pbr_count": 139
     },
     "기계·장비": {
-      "per": 13.87,
+      "per": 14.69,
       "per_count": 118,
-      "pbr": 0.94,
+      "pbr": 1.02,
       "pbr_count": 205
     },
     "기타제조": {
-      "per": 6.12,
+      "per": 6.4,
       "per_count": 4,
-      "pbr": 0.6,
+      "pbr": 0.58,
       "pbr_count": 12
     },
     "리츠": {
-      "per": 28.04,
+      "per": 27.85,
       "per_count": 11,
-      "pbr": 0.61,
+      "pbr": 0.6,
       "pbr_count": 17
     },
     "보험": {
-      "per": 7.42,
+      "per": 7.33,
       "per_count": 10,
-      "pbr": 0.63,
+      "pbr": 0.59,
       "pbr_count": 10
     },
     "부동산": {
-      "per": 8.68,
+      "per": 8.2,
       "per_count": 2,
-      "pbr": 0.62,
+      "pbr": 0.57,
       "pbr_count": 3
     },
     "비금속": {
-      "per": 14.5,
+      "per": 16.17,
       "per_count": 18,
-      "pbr": 0.41,
+      "pbr": 0.4,
       "pbr_count": 34
     },
     "섬유·의류": {
-      "per": 6.6,
+      "per": 6.49,
       "per_count": 28,
-      "pbr": 0.36,
+      "pbr": 0.37,
       "pbr_count": 47
     },
     "오락·문화": {
-      "per": 10.45,
+      "per": 9.82,
       "per_count": 31,
-      "pbr": 0.55,
+      "pbr": 0.53,
       "pbr_count": 65
     },
     "외국증권": {
-      "per": 16.74,
+      "per": 16.26,
       "per_count": 10,
-      "pbr": 0.3,
+      "pbr": 0.29,
       "pbr_count": 12
     },
     "운송·창고": {
-      "per": 6.77,
+      "per": 6.74,
       "per_count": 20,
-      "pbr": 0.48,
+      "pbr": 0.46,
       "pbr_count": 28
     },
     "운송장비·부품": {
-      "per": 6.47,
+      "per": 6.53,
       "per_count": 95,
-      "pbr": 0.46,
+      "pbr": 0.45,
       "pbr_count": 130
     },
     "유통": {
-      "per": 11.45,
+      "per": 11.99,
       "per_count": 92,
-      "pbr": 0.51,
+      "pbr": 0.52,
       "pbr_count": 153
     },
     "음식료·담배": {
-      "per": 8.67,
+      "per": 8.37,
       "per_count": 57,
-      "pbr": 0.47,
+      "pbr": 0.46,
       "pbr_count": 84
     },
     "의료·정밀기기": {
-      "per": 17.76,
+      "per": 17.65,
       "per_count": 57,
-      "pbr": 0.95,
+      "pbr": 0.96,
       "pbr_count": 100
     },
     "인프라투용": {
@@ -116,61 +116,61 @@
       "pbr_count": 0
     },
     "일반서비스": {
-      "per": 11.57,
+      "per": 11.38,
       "per_count": 86,
-      "pbr": 1.02,
+      "pbr": 1.03,
       "pbr_count": 160
     },
     "전기·가스": {
-      "per": 4.22,
+      "per": 4.52,
       "per_count": 9,
       "pbr": 0.33,
       "pbr_count": 10
     },
     "전기·전자": {
-      "per": 13.55,
+      "per": 13.98,
       "per_count": 207,
       "pbr": 0.99,
       "pbr_count": 358
     },
     "제약": {
-      "per": 15.76,
+      "per": 15.11,
       "per_count": 86,
-      "pbr": 0.96,
+      "pbr": 0.95,
       "pbr_count": 160
     },
     "제조": {
-      "per": 7.77,
+      "per": 7.76,
       "per_count": 3,
       "pbr": 0.32,
       "pbr_count": 8
     },
     "종이·목재": {
-      "per": 14.26,
+      "per": 14.19,
       "per_count": 11,
-      "pbr": 0.29,
+      "pbr": 0.25,
       "pbr_count": 27
     },
     "증권": {
-      "per": 7.65,
+      "per": 7.54,
       "per_count": 17,
-      "pbr": 0.4,
+      "pbr": 0.41,
       "pbr_count": 18
     },
     "출판·매체복제": {
-      "per": 9.11,
+      "per": 9.07,
       "per_count": 1,
-      "pbr": 0.61,
+      "pbr": 0.59,
       "pbr_count": 2
     },
     "통신": {
-      "per": 11.76,
+      "per": 11.53,
       "per_count": 11,
       "pbr": 0.75,
       "pbr_count": 13
     },
     "화학": {
-      "per": 11.7,
+      "per": 12.26,
       "per_count": 152,
       "pbr": 0.61,
       "pbr_count": 214
