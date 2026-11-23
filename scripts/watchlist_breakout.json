@@ -1,18 +1,6 @@
 {
   "items": [
     {
-      "name": "한진칼",
-      "code": "180640",
-      "market": "KOSPI",
-      "trigger_date": "2026-11-03",
-      "trigger_close": 175200.0,
-      "trigger_change_pct": 29.970326409495552,
-      "trigger_turnover": 187708053600.0,
-      "prior_3m_high": 148900.0,
-      "alerted_5d": true,
-      "alerted_10d": false
-    },
-    {
       "name": "지니언스",
       "code": "263860",
       "market": "KOSDAQ",
@@ -33,7 +21,7 @@
       "trigger_change_pct": 16.40826873385013,
       "trigger_turnover": 132585168350.0,
       "prior_3m_high": 41300.0,
-      "alerted_5d": false,
+      "alerted_5d": true,
       "alerted_10d": false
     }
   ],
